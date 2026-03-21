@@ -372,8 +372,11 @@ function initFirebase() {
         renderMXTable(); updateHeader();
         const dashTab = document.getElementById('tab-dashboard');
         if (dashTab && dashTab.classList.contains('active')) renderDashboard();
-        setSyncStatus('synced');
+      } else if (val === null) {
+        // Base vacía: subir datos locales
+        db.ref('vip_mx').set(mxData);
       }
+      setSyncStatus('synced');
     });
     db.ref('vip_dh').on('value', snap => {
       const val = snap.val();
@@ -381,8 +384,11 @@ function initFirebase() {
         dhData = val;
         if (_lsOk) try { localStorage.setItem('vip_dh', JSON.stringify(dhData)); } catch(e){}
         renderDHTable(); updateHeader();
-        setSyncStatus('synced');
+      } else if (val === null) {
+        // Base vacía: subir datos locales
+        db.ref('vip_dh').set(dhData);
       }
+      setSyncStatus('synced');
     });
   } catch(e) { console.warn('Firebase:', e); db = null; setSyncStatus('error'); }
 }
