@@ -780,7 +780,10 @@ function exportar(grupo) {
   const fecha = new Date().toISOString().slice(0,10);
   if (grupo === 'MX VIP') {
     if (mxData.length === 0) { alert('No hay datos MX VIP'); return; }
-    const data = mxData.map(r => ({
+    const historicos = mxData.filter(r => r.historico);
+    const nuevos = mxData.filter(r => !r.historico);
+    const sorted = [...historicos, ...nuevos];
+    const data = sorted.map(r => ({
       'Nombre': r.nombre,
       'ID': r.id,
       'Duracion': r.plan,
