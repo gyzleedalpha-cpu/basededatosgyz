@@ -741,17 +741,29 @@ function importarDH(input) {
 function exportar(grupo) {
   let data = [];
   if (grupo === 'MX VIP' || grupo === 'todos') {
-    mxData.forEach(r => data.push({ Nombre:r.nombre, ID:r.id, Duración:r.plan, 'Entrada - Salida':r.fechas, Pago:r.monto, 'Método':r.metodo, Grupo:'MX VIP' }));
+    mxData.forEach(r => data.push({ Nombre:r.nombre, ID:r.id, 'Duracion':r.plan, 'Entrada - Salida':r.fechas, Pago:r.monto, Metodo:r.metodo, Grupo:'MX VIP' }));
   }
   if (grupo === 'DarkHub' || grupo === 'todos') {
-    dhData.forEach(r => data.push({ Nombre:r.nombre, ID:r.id, Duración:'Permanente', 'Entrada - Salida':'Permanente', Pago:r.monto, 'Método':r.metodo, Grupo:'DarkHub' }));
+    dhData.forEach(r => data.push({ Nombre:r.nombre, ID:r.id, 'Duracion':'Permanente', 'Entrada - Salida':'Permanente', Pago:r.monto, Metodo:r.metodo, Grupo:'DarkHub' }));
   }
   if (data.length===0) { alert('No hay datos para exportar'); return; }
-  const ws = XLSX.utils.json_to_sheet(data);
-  ws['!cols'] = [22,14,12,24,8,14,10].map(w=>({wch:w}));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'VIP Data');
-  XLSX.utils.writeFile(wb, `vip_export_${new Date().toISOString().slice(0,10)}.xlsx`);
+  try {
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws['!cols'] = [22,14,12,24,8,14,10].map(w=>({wch:w}));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'VIP Data');
+    const wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+    const blob = new Blob([wbout], {type:'application/octet-stream'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vip_export_' + new Date().toISOString().slice(0,10) + '.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+  } catch(e) {
+    alert('Error al exportar: ' + e.message);
+  }
 }
 
 function renderMemStats() {
