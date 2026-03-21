@@ -822,6 +822,7 @@ function updateHeader() {
 
 // ─── DASHBOARD ──────────────────────────────────────────────────────────────
 function renderDashboard() {
+  try {
   const parseEnt = r => {
     if (!r.entrada) return null;
     const p = r.entrada.split('/');
@@ -983,6 +984,7 @@ function renderDashboard() {
     const cls=r._dias===0?'pill pill-0':r._dias<=3?'pill pill-low':'pill pill-ok';
     return `<tr><td><strong>${r.nombre}</strong></td><td class="muted">${r.fechas}</td><td>${statusBadge(r._status)}</td><td style="text-align:right"><span class="${cls}">${txt}</span></td></tr>`;
   }).join('');
+  } catch(err) { document.getElementById("dash-cards").innerHTML = `<div style="color:red;padding:16px;font-size:13px">Error en dashboard: ${err.message}<br><pre>${err.stack}</pre></div>`; console.error(err); }
 }
 
 // ─── ANÁLISIS CHARTS ─────────────────────────────────────────────────────────
