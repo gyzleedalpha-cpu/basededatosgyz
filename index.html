@@ -228,31 +228,42 @@ td.muted{color:#4b5563;font-size:11px}
 <!-- ===== DASHBOARD ===== -->
 <div id="tab-dashboard" class="tab-content">
 <main>
-  <div class="slabel">Resumen general</div>
+  <div class="slabel">KPIs principales</div>
   <div class="cards" id="dash-cards"></div>
+  <div class="cards" id="dash-cards2" style="margin-top:0"></div>
+
+  <div class="slabel" style="margin-top:16px">Ingresos combinados por mes</div>
+  <div class="panel">
+    <div class="chart-wrap" style="height:240px"><canvas id="chartIngMes"></canvas></div>
+    <div class="stat-row" id="dash-ing-totals"></div>
+  </div>
+
   <div class="grid2">
-    <div class="panel"><h3>Ingresos MX VIP por mes</h3><div class="chart-wrap"><canvas id="chartMensual"></canvas></div>
-      <div class="stat-row" id="dash-mx-totals"></div>
+    <div class="panel">
+      <h3>Suscripciones vendidas por mes</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartSubsMes"></canvas></div>
+      <div class="stat-row" id="dash-subs-totals"></div>
     </div>
-    <div class="panel"><h3>Distribución de planes MX VIP</h3>
-      <div id="plan-bars"></div>
+    <div class="panel">
+      <h3>Días con más ventas</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartDow"></canvas></div>
     </div>
   </div>
+
   <div class="grid2">
-    <div class="panel"><h3>Ingresos DarkHub por monto</h3><div class="chart-wrap"><canvas id="chartDH"></canvas></div>
+    <div class="panel">
+      <h3>Planes MX VIP</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartPlanes"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>DarkHub por monto de acceso</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartDH"></canvas></div>
       <div class="stat-row" id="dash-dh-totals"></div>
     </div>
-    <div class="panel"><h3>Comparativa total ambos grupos</h3><div class="chart-wrap"><canvas id="chartComparativa"></canvas></div>
-      <div class="stat-row" id="dash-comp-totals"></div>
-    </div>
   </div>
+
   <div class="panel">
-    <h3>Suscripciones vendidas por mes</h3>
-    <div class="chart-wrap" style="height:220px"><canvas id="chartSubsMes"></canvas></div>
-    <div class="stat-row" id="dash-subs-totals"></div>
-  </div>
-  <div class="panel">
-    <h3>Vencen esta semana</h3>
+    <h3>Próximos a vencer</h3>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Nombre</th><th>Fechas</th><th>Estado</th><th style="text-align:right">Días</th></tr></thead>
       <tbody id="dash-proximos"></tbody>
@@ -682,121 +693,154 @@ function updateHeader() {
 }
 
 // ─── DASHBOARD ──────────────────────────────────────────────────────────────
-let dashChartM = null;
 function renderDashboard() {
-  const statusCount = {};
-  mxData.forEach(r => { const s = getStatus(r); statusCount[s] = (statusCount[s]||0)+1; });
-  const activos = (statusCount['ACTIVO']||0) + (statusCount['PRÓXIMO']||0) + (statusCount['VENCE HOY']||0);
-  const totalMX = mxData.reduce((a,r) => a+r.monto, 0);
-  const totalDH = dhData.reduce((a,r) => a+r.monto, 0);
-
-  // Monthly for current data
-  const monthly = {};
-  mxData.forEach(r => {
-    if (!r.entrada) return;
-    const parts = r.entrada.split('/');
-    if (parts.length !== 3) return;
-    try {
-      const d = new Date(2000+parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
-      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      const label = d.toLocaleDateString('es-MX', {month:'short', year:'2-digit'});
-      if (!monthly[key]) monthly[key] = { label, ingresos: 0, subs: 0 };
-      monthly[key].ingresos += r.monto;
-      monthly[key].subs += 1;
-    } catch(e){}
-  });
-  const mList = Object.entries(monthly).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
-  const mesActual = mList.length ? mList[mList.length-1][1].ingresos : 0;
-
-  // Plans
-  const planCount = {};
-  mxData.forEach(r => { const p = r.plan || 'Otro'; planCount[p] = (planCount[p]||0)+1; });
-
-  // Cards
-  document.getElementById('dash-cards').innerHTML = `
-    <div class="card green"><div class="lbl">Activos MX VIP</div><div class="val">${activos}</div><div class="sub">activos + próximos</div></div>
-    <div class="card teal"><div class="lbl">DarkHub</div><div class="val">${dhData.length}</div><div class="sub">permanentes</div></div>
-    <div class="card yellow"><div class="lbl">Vencen esta semana</div><div class="val">${statusCount['PRÓXIMO']||0}</div><div class="sub">requieren renovación</div></div>
-    <div class="card red"><div class="lbl">Vencidos</div><div class="val">${statusCount['VENCIDO']||0}</div><div class="sub">posibles reactivaciones</div></div>
-    <div class="card blue"><div class="lbl">Ingresos este mes</div><div class="val">$${Math.round(mesActual).toLocaleString()}</div><div class="sub">MX VIP</div></div>
-    <div class="card purple"><div class="lbl">Total histórico</div><div class="val">$${Math.round(totalMX+totalDH).toLocaleString()}</div><div class="sub">ambos grupos</div></div>
-  `;
-
-  // Plan bars
-  const plans = [['2 semanas','#1D9E75'],['1 mes','#378ADD'],['2 meses','#7F77DD'],['Permanente','#0F6E56']];
-  const maxP = Math.max(...plans.map(([p]) => planCount[p]||0), 1);
-  document.getElementById('plan-bars').innerHTML = plans.map(([p,c]) => {
-    const n = planCount[p]||0;
-    return `<div class="plan-row"><div class="plan-label">${p}</div><div class="plan-bar-wrap"><div class="plan-bar" style="width:${Math.round(n/maxP*100)}%;background:${c}"></div></div><div class="plan-count">${n}</div></div>`;
-  }).join('');
-
-  // MX VIP Monthly chart
-  if (dashChartM) { dashChartM.destroy(); dashChartM = null; }
-  const greens = ['#C0DD97','#9FE1CB','#5DCAA5','#1D9E75','#0F6E56','#085041'];
-  dashChartM = new Chart(document.getElementById('chartMensual'), {
-    type:'bar',
-    data:{ labels: mList.map(([,v])=>v.label), datasets:[{ data: mList.map(([,v])=>v.ingresos), backgroundColor: mList.map((_,i)=>greens[Math.min(i,greens.length-1)]), borderRadius:5, borderSkipped:false }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>'$'+Math.round(c.parsed.y).toLocaleString()}}}, scales:{ x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}}, y:{grid:{color:'rgba(255,255,255,.06)'},ticks:{font:{size:10},callback:v=>'$'+v.toLocaleString()}} } }
-  });
-  document.getElementById('dash-mx-totals').innerHTML = `<span>Total MX VIP: <strong>$${Math.round(totalMX).toLocaleString()}</strong></span><span>Este mes: <strong>$${Math.round(mesActual).toLocaleString()}</strong></span>`;
-
-  // DarkHub chart by payment amount
-  const dhAmounts = {};
-  dhData.forEach(r => { const k='$'+r.monto; dhAmounts[k]=(dhAmounts[k]||0)+1; });
-  const dhLabels = Object.keys(dhAmounts).sort((a,b)=>parseFloat(a.slice(1))-parseFloat(b.slice(1)));
-  const dhVals = dhLabels.map(k=>dhAmounts[k]);
-  if (window._dashChartDH) { window._dashChartDH.destroy(); }
-  window._dashChartDH = new Chart(document.getElementById('chartDH'), {
-    type:'doughnut',
-    data:{ labels:dhLabels, datasets:[{ data:dhVals, backgroundColor:['#7F77DD','#378ADD','#1D9E75'], borderWidth:0, hoverOffset:4 }] },
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:10}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} miembros`}} } }
-  });
-  document.getElementById('dash-dh-totals').innerHTML = `<span>Total DarkHub: <strong>$${Math.round(totalDH).toLocaleString()}</strong></span><span>Miembros: <strong>${dhData.length}</strong></span>`;
-
-  // Comparativa bar
-  if (window._dashChartComp) { window._dashChartComp.destroy(); }
-  window._dashChartComp = new Chart(document.getElementById('chartComparativa'), {
-    type:'bar',
-    data:{ labels:['MX VIP','DarkHub'], datasets:[{ data:[Math.round(totalMX),Math.round(totalDH)], backgroundColor:['#1D9E75','#378ADD'], borderRadius:6, borderSkipped:false }] },
-    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>' $'+c.parsed.x.toLocaleString()}}}, scales:{ x:{grid:{color:'rgba(255,255,255,.06)'},ticks:{font:{size:10},callback:v=>'$'+v.toLocaleString()}}, y:{grid:{display:false},ticks:{font:{size:12},color:'#6b7280'}} } }
-  });
-  document.getElementById('dash-comp-totals').innerHTML = `<span>MX VIP: <strong>$${Math.round(totalMX).toLocaleString()}</strong></span><span>DarkHub: <strong>$${Math.round(totalDH).toLocaleString()}</strong></span><span>Total: <strong>$${Math.round(totalMX+totalDH).toLocaleString()}</strong></span>`;
-
-  // Subs vendidas por mes (MX VIP + DarkHub + Total)
-  const subsMX = {}, subsDH = {};
-  const parseEntrada = r => {
+  const parseEnt = r => {
     if (!r.entrada) return null;
     const p = r.entrada.split('/');
     if (p.length !== 3) return null;
-    try { return `${2000+parseInt(p[2])}-${p[1].padStart(2,'0')}`; } catch(e){ return null; }
+    try { return new Date(2000+parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0])); } catch(e){ return null; }
   };
-  mxData.forEach(r => { const k = parseEntrada(r); if (k) subsMX[k] = (subsMX[k]||0)+1; });
-  dhData.forEach(r => { const k = parseEntrada(r); if (k) subsDH[k] = (subsDH[k]||0)+1; });
-  const allKeys = [...new Set([...Object.keys(subsMX), ...Object.keys(subsDH)])].sort().slice(-8);
-  const labelsSubs = allKeys.map(k => { const [y,m]=k.split('-'); return new Date(+y,+m-1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}); });
-  const valsMX = allKeys.map(k => subsMX[k]||0);
-  const valsDH = allKeys.map(k => subsDH[k]||0);
-  const valsTotal = allKeys.map((k,i) => valsMX[i]+valsDH[i]);
+  const monthKey = d => d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : null;
+  const monthLabel = k => { const [y,m]=k.split('-'); return new Date(+y,+m-1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}); };
+
+  // --- status counts
+  const statusCount = {};
+  mxData.forEach(r => { const s=getStatus(r); statusCount[s]=(statusCount[s]||0)+1; });
+  const activos = (statusCount['ACTIVO']||0)+(statusCount['PRÓXIMO']||0)+(statusCount['VENCE HOY']||0)+(statusCount['PERMANENTE']||0);
+
+  // --- totals
+  const totalMX = mxData.reduce((a,r)=>a+r.monto,0);
+  const totalDH = dhData.reduce((a,r)=>a+r.monto,0);
+
+  // --- monthly revenue (MX + DH)
+  const monthMX = {}, monthDH = {};
+  mxData.forEach(r => { const d=parseEnt(r); const k=monthKey(d); if(k){ monthMX[k]=(monthMX[k]||0)+r.monto; } });
+  dhData.forEach(r => { const d=parseEnt(r); const k=monthKey(d); if(k){ monthDH[k]=(monthDH[k]||0)+r.monto; } });
+  const allMonths = [...new Set([...Object.keys(monthMX),...Object.keys(monthDH)])].sort().slice(-8);
+  const ingMXvals = allMonths.map(k=>Math.round(monthMX[k]||0));
+  const ingDHvals = allMonths.map(k=>Math.round(monthDH[k]||0));
+  const ingTotals = allMonths.map((_,i)=>ingMXvals[i]+ingDHvals[i]);
+
+  // --- this month & last month
+  const thisMonthKey = monthKey(new Date());
+  const lastMonthDate = new Date(); lastMonthDate.setMonth(lastMonthDate.getMonth()-1);
+  const lastMonthKey = monthKey(lastMonthDate);
+  const ingThisMonth = (monthMX[thisMonthKey]||0)+(monthDH[thisMonthKey]||0);
+  const ingLastMonth = (monthMX[lastMonthKey]||0)+(monthDH[lastMonthKey]||0);
+  const crecimiento = ingLastMonth > 0 ? ((ingThisMonth-ingLastMonth)/ingLastMonth*100).toFixed(1) : null;
+
+  // --- ticket promedio MX VIP (activos con monto)
+  const mxConMonto = mxData.filter(r=>r.monto>0);
+  const ticketMX = mxConMonto.length ? Math.round(mxConMonto.reduce((a,r)=>a+r.monto,0)/mxConMonto.length) : 0;
+
+  // --- mejor mes
+  let bestKey='', bestVal=0;
+  allMonths.forEach(k=>{ const v=(monthMX[k]||0)+(monthDH[k]||0); if(v>bestVal){bestVal=v;bestKey=k;} });
+  const bestLabel = bestKey ? monthLabel(bestKey) : '—';
+
+  // --- subs por mes
+  const subsMX={}, subsDH={};
+  mxData.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) subsMX[k]=(subsMX[k]||0)+1; });
+  dhData.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) subsDH[k]=(subsDH[k]||0)+1; });
+  const allSubMonths=[...new Set([...Object.keys(subsMX),...Object.keys(subsDH)])].sort().slice(-8);
+  const valsMX=allSubMonths.map(k=>subsMX[k]||0);
+  const valsDH=allSubMonths.map(k=>subsDH[k]||0);
+  const valsTotal=allSubMonths.map((_,i)=>valsMX[i]+valsDH[i]);
+  const mesMX=valsMX[valsMX.length-1]||0, mesDH=valsDH[valsDH.length-1]||0;
+
+  // --- day of week (0=Dom, 1=Lun, ..., 6=Sab)
+  const dowLabels=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const dowCount=[0,0,0,0,0,0,0];
+  [...mxData,...dhData].forEach(r=>{ const d=parseEnt(r); if(d) dowCount[d.getDay()]++; });
+
+  // --- plan distribution
+  const planCount={};
+  mxData.forEach(r=>{ const p=r.plan||'Otro'; planCount[p]=(planCount[p]||0)+1; });
+
+  // --- DarkHub by amount
+  const dhAmounts={};
+  dhData.forEach(r=>{ const k='$'+r.monto; dhAmounts[k]=(dhAmounts[k]||0)+1; });
+  const dhLabels=Object.keys(dhAmounts).sort((a,b)=>parseFloat(a.slice(1))-parseFloat(b.slice(1)));
+
+  // ══ CARDS ROW 1 ══
+  document.getElementById('dash-cards').innerHTML = `
+    <div class="card green"><div class="lbl">Activos MX VIP</div><div class="val">${activos}</div><div class="sub">activos + próximos + perm.</div></div>
+    <div class="card teal"><div class="lbl">DarkHub</div><div class="val">${dhData.length}</div><div class="sub">miembros activos</div></div>
+    <div class="card blue"><div class="lbl">Ingresos este mes</div><div class="val">$${Math.round(ingThisMonth).toLocaleString()}</div><div class="sub">MX VIP + DarkHub</div></div>
+    <div class="card yellow"><div class="lbl">Próximos a vencer</div><div class="val">${statusCount['PRÓXIMO']||0}</div><div class="sub">esta semana</div></div>
+  `;
+
+  // ══ CARDS ROW 2 ══
+  const crecHtml = crecimiento !== null
+    ? `<div class="card ${parseFloat(crecimiento)>=0?'green':'red'}"><div class="lbl">Crecimiento vs mes anterior</div><div class="val">${parseFloat(crecimiento)>=0?'+':''}${crecimiento}%</div><div class="sub">en ingresos</div></div>`
+    : `<div class="card purple"><div class="lbl">Crecimiento</div><div class="val">—</div><div class="sub">sin datos mes anterior</div></div>`;
+  document.getElementById('dash-cards2').innerHTML = `
+    <div class="card purple"><div class="lbl">Ticket promedio MX VIP</div><div class="val">$${ticketMX.toLocaleString()}</div><div class="sub">por suscriptor</div></div>
+    <div class="card blue"><div class="lbl">Mejor mes</div><div class="val">${bestLabel}</div><div class="sub">$${Math.round(bestVal).toLocaleString()} ingresos</div></div>
+    <div class="card teal"><div class="lbl">Total histórico</div><div class="val">$${Math.round(totalMX+totalDH).toLocaleString()}</div><div class="sub">MX VIP + DarkHub</div></div>
+    ${crecHtml}
+  `;
+
+  // ══ INGRESOS COMBINADOS POR MES ══
+  if (window._dashChartIng) window._dashChartIng.destroy();
+  window._dashChartIng = new Chart(document.getElementById('chartIngMes'), {
+    type:'bar',
+    data:{ labels:allMonths.map(monthLabel), datasets:[
+      { label:'MX VIP', data:ingMXvals, backgroundColor:'#1D9E75', borderRadius:4, borderSkipped:false, stack:'a' },
+      { label:'DarkHub', data:ingDHvals, backgroundColor:'#378ADD', borderRadius:4, borderSkipped:false, stack:'a' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{labels:{font:{size:11},boxWidth:10}}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: $${c.parsed.y.toLocaleString()}`}} }, scales:{ x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}}, y:{stacked:true, grid:{color:'rgba(255,255,255,.06)'},ticks:{font:{size:10},callback:v=>'$'+v.toLocaleString()}} } }
+  });
+  document.getElementById('dash-ing-totals').innerHTML = `<span>MX VIP total: <strong>$${Math.round(totalMX).toLocaleString()}</strong></span><span>DarkHub total: <strong>$${Math.round(totalDH).toLocaleString()}</strong></span><span>Combinado: <strong>$${Math.round(totalMX+totalDH).toLocaleString()}</strong></span>`;
+
+  // ══ SUBS POR MES ══
   if (window._dashChartSubs) window._dashChartSubs.destroy();
   window._dashChartSubs = new Chart(document.getElementById('chartSubsMes'), {
     type:'bar',
-    data:{ labels:labelsSubs, datasets:[
-      { label:'MX VIP', data:valsMX, backgroundColor:'#1D9E75', borderRadius:4, borderSkipped:false },
-      { label:'DarkHub', data:valsDH, backgroundColor:'#378ADD', borderRadius:4, borderSkipped:false },
-      { label:'Total', data:valsTotal, backgroundColor:'rgba(167,139,250,.35)', borderRadius:4, borderSkipped:false }
+    data:{ labels:allSubMonths.map(monthLabel), datasets:[
+      { label:'MX VIP', data:valsMX, backgroundColor:'#1D9E75', borderRadius:3, borderSkipped:false },
+      { label:'DarkHub', data:valsDH, backgroundColor:'#378ADD', borderRadius:3, borderSkipped:false },
+      { label:'Total', data:valsTotal, backgroundColor:'rgba(167,139,250,.3)', borderRadius:3, borderSkipped:false }
     ]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{labels:{font:{size:11},boxWidth:10,padding:12}}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y} subs`}} }, scales:{ x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}}, y:{grid:{color:'rgba(255,255,255,.06)'},ticks:{font:{size:10},color:'#6b7280',stepSize:1}} } }
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{labels:{font:{size:10},boxWidth:8,padding:10}}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y} subs`}} }, scales:{ x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}}, y:{grid:{color:'rgba(255,255,255,.06)'},ticks:{font:{size:10},stepSize:1}} } }
   });
-  const mesMX = valsMX[valsMX.length-1]||0, mesDH = valsDH[valsDH.length-1]||0;
-  document.getElementById('dash-subs-totals').innerHTML = `<span>MX VIP este mes: <strong>${mesMX}</strong></span><span>DarkHub este mes: <strong>${mesDH}</strong></span><span>Total este mes: <strong>${mesMX+mesDH}</strong></span>`;
+  document.getElementById('dash-subs-totals').innerHTML = `<span>MX VIP este mes: <strong>${mesMX}</strong></span><span>DarkHub este mes: <strong>${mesDH}</strong></span><span>Total: <strong>${mesMX+mesDH}</strong></span>`;
 
-  // Proximos table
-  const prox = mxData.filter(r => { const s=getStatus(r); return s==='PRÓXIMO'||s==='VENCE HOY'; }).map(r=>({...r,_dias:getDias(r),_status:getStatus(r)})).sort((a,b)=>(a._dias||0)-(b._dias||0));
-  const dtbody = document.getElementById('dash-proximos');
-  if (prox.length===0) { dtbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#bbb;padding:16px">Nadie vence esta semana</td></tr>'; return; }
-  dtbody.innerHTML = prox.map(r => {
-    const txt = r._dias===0?'Hoy':r._dias+'d';
-    const cls = r._dias===0?'pill pill-0':r._dias<=3?'pill pill-low':'pill pill-ok';
+  // ══ DÍAS DE LA SEMANA ══
+  if (window._dashChartDow) window._dashChartDow.destroy();
+  window._dashChartDow = new Chart(document.getElementById('chartDow'), {
+    type:'bar',
+    data:{ labels:dowLabels, datasets:[{ data:dowCount, backgroundColor:dowCount.map(v=>v===Math.max(...dowCount)?'#1D9E75':'rgba(29,158,117,.3)'), borderRadius:4, borderSkipped:false }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.parsed.y} ventas`}} }, scales:{ x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}}, y:{grid:{color:'rgba(255,255,255,.06)'},ticks:{font:{size:10},stepSize:1}} } }
+  });
+
+  // ══ PLANES MX VIP (donut) ══
+  const planNames=['2 Semanas','1 Mes','2 Meses','Permanente'];
+  const planColors=['#1D9E75','#378ADD','#7F77DD','#0F6E56'];
+  const planVals=planNames.map(p=>planCount[p]||0);
+  if (window._dashChartPlanes) window._dashChartPlanes.destroy();
+  window._dashChartPlanes = new Chart(document.getElementById('chartPlanes'), {
+    type:'doughnut',
+    data:{ labels:planNames, datasets:[{ data:planVals, backgroundColor:planColors, borderWidth:0, hoverOffset:4 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:10}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} subs`}} } }
+  });
+
+  // ══ DARKHUB POR MONTO ══
+  if (window._dashChartDH) window._dashChartDH.destroy();
+  window._dashChartDH = new Chart(document.getElementById('chartDH'), {
+    type:'doughnut',
+    data:{ labels:dhLabels, datasets:[{ data:dhLabels.map(k=>dhAmounts[k]), backgroundColor:['#7F77DD','#378ADD','#1D9E75','#0F6E56'], borderWidth:0, hoverOffset:4 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:10}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} miembros`}} } }
+  });
+  document.getElementById('dash-dh-totals').innerHTML = `<span>Total: <strong>$${Math.round(totalDH).toLocaleString()}</strong></span><span>Miembros: <strong>${dhData.length}</strong></span>`;
+
+  // ══ PRÓXIMOS A VENCER ══
+  const prox=mxData.filter(r=>{const s=getStatus(r);return s==='PRÓXIMO'||s==='VENCE HOY';}).map(r=>({...r,_dias:getDias(r),_status:getStatus(r)})).sort((a,b)=>(a._dias||0)-(b._dias||0));
+  const dtbody=document.getElementById('dash-proximos');
+  if(prox.length===0){dtbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#bbb;padding:16px">Nadie vence esta semana</td></tr>';return;}
+  dtbody.innerHTML=prox.map(r=>{
+    const txt=r._dias===0?'Hoy':r._dias+'d';
+    const cls=r._dias===0?'pill pill-0':r._dias<=3?'pill pill-low':'pill pill-ok';
     return `<tr><td><strong>${r.nombre}</strong></td><td class="muted">${r.fechas}</td><td>${statusBadge(r._status)}</td><td style="text-align:right"><span class="${cls}">${txt}</span></td></tr>`;
   }).join('');
 }
