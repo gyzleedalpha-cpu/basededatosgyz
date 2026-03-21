@@ -462,7 +462,7 @@ function registrarMX() {
   const salida = plan === 'Permanente' ? 'Permanente' : (sDate ? fmtDate(sDate) : '');
   const fechas = plan === 'Permanente' ? 'Permanente' : (sDate ? `${entrada} - ${salida}` : '');
   const rec = { grupo:'MX VIP', nombre, id, plan, fechas, entrada, salida, monto: parseFloat(monto), metodo, status: plan === 'Permanente' ? 'PERMANENTE' : 'ACTIVO', historico: false, ts: new Date().toISOString() };
-  mxData.unshift(rec);
+  mxData.push(rec);
   saveData();
   toast('toast-mx', 'Guardado en MX VIP');
   document.getElementById('mx-nombre').value = '';
@@ -483,7 +483,7 @@ function registrarDH() {
   if (!nombre) { alert('Falta el nombre'); return; }
   if (!monto) { alert('Falta el monto'); return; }
   const rec = { grupo:'DarkHub', nombre, id, plan:'Permanente', fechas:'Permanente', entrada: fmtDate(new Date()), salida:'Permanente', monto: parseFloat(monto), metodo, status:'PERMANENTE', historico: false, ts: new Date().toISOString() };
-  dhData.unshift(rec);
+  dhData.push(rec);
   saveData();
   toast('toast-dh', 'Guardado en DarkHub');
   document.getElementById('dh-nombre').value = '';
@@ -738,31 +738,83 @@ function importarDH(input) {
 }
 
 // ─── EXPORTAR ────────────────────────────────────────────────────────────────
-function exportar(grupo) {
-  let data = [];
-  if (grupo === 'MX VIP' || grupo === 'todos') {
-    mxData.forEach(r => data.push({ Nombre:r.nombre, ID:r.id, 'Duracion':r.plan, 'Entrada - Salida':r.fechas, Pago:r.monto, Metodo:r.metodo, Grupo:'MX VIP' }));
-  }
-  if (grupo === 'DarkHub' || grupo === 'todos') {
-    dhData.forEach(r => data.push({ Nombre:r.nombre, ID:r.id, 'Duracion':'Permanente', 'Entrada - Salida':'Permanente', Pago:r.monto, Metodo:r.metodo, Grupo:'DarkHub' }));
-  }
-  if (data.length===0) { alert('No hay datos para exportar'); return; }
+function descargarExcel(data, cols, sheetName, fileName) {
   try {
     const ws = XLSX.utils.json_to_sheet(data);
-    ws['!cols'] = [22,14,12,24,8,14,10].map(w=>({wch:w}));
+    ws['!cols'] = cols.map(w=>({wch:w}));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'VIP Data');
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
     const wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
     const blob = new Blob([wbout], {type:'application/octet-stream'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'vip_export_' + new Date().toISOString().slice(0,10) + '.xlsx';
+    a.download = fileName + '_' + new Date().toISOString().slice(0,10) + '.xlsx';
     document.body.appendChild(a);
     a.click();
     setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
-  } catch(e) {
-    alert('Error al exportar: ' + e.message);
+  } catch(e) { alert('Error al exportar: ' + e.message); }
+}
+
+function calcDias(salida) {
+  if (!salida || salida === 'Permanente') return '';
+  const parts = salida.split('/');
+  if (parts.length !== 3) return '';
+  const end = new Date(2000+parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.round((end - today) / 86400000);
+}
+
+function calcEstado(salida, plan) {
+  if (plan === 'Permanente' || salida === 'Permanente') return 'PERMANENTE';
+  if (!salida) return 'YA SALIÓ';
+  const d = calcDias(salida);
+  if (d === '') return 'YA SALIÓ';
+  if (d < 0) return 'VENCIDO';
+  if (d === 0) return 'VENCE HOY';
+  if (d <= 7) return 'PRÓXIMO';
+  return 'ACTIVO';
+}
+
+function exportar(grupo) {
+  const fecha = new Date().toISOString().slice(0,10);
+  if (grupo === 'MX VIP') {
+    if (mxData.length === 0) { alert('No hay datos MX VIP'); return; }
+    const data = mxData.map(r => ({
+      'Nombre': r.nombre,
+      'ID': r.id,
+      'Duracion': r.plan,
+      'Entrada - Salida': r.fechas,
+      'Pago': r.monto,
+      'Dias restantes': calcDias(r.salida),
+      'Estado': calcEstado(r.salida, r.plan),
+      'Metodo': r.metodo || ''
+    }));
+    descargarExcel(data, [22,14,12,24,8,14,10,14], 'MX VIP', 'MX_VIP');
+  } else if (grupo === 'DarkHub') {
+    if (dhData.length === 0) { alert('No hay datos DarkHub'); return; }
+    const data = dhData.map(r => ({
+      'Nombre': r.nombre,
+      'ID': r.id,
+      'Pago': r.monto,
+      'Metodo': r.metodo || ''
+    }));
+    descargarExcel(data, [22,14,8,14], 'DarkHub', 'DarkHub');
+  } else if (grupo === 'todos') {
+    if (mxData.length === 0 && dhData.length === 0) { alert('No hay datos'); return; }
+    const dataMX = mxData.map(r => ({
+      'Nombre': r.nombre, 'ID': r.id, 'Duracion': r.plan,
+      'Entrada - Salida': r.fechas, 'Pago': r.monto,
+      'Dias restantes': calcDias(r.salida), 'Estado': calcEstado(r.salida, r.plan),
+      'Metodo': r.metodo || '', 'Grupo': 'MX VIP'
+    }));
+    const dataDH = dhData.map(r => ({
+      'Nombre': r.nombre, 'ID': r.id, 'Duracion': 'Permanente',
+      'Entrada - Salida': 'Permanente', 'Pago': r.monto,
+      'Dias restantes': '', 'Estado': 'PERMANENTE',
+      'Metodo': r.metodo || '', 'Grupo': 'DarkHub'
+    }));
+    descargarExcel([...dataMX,...dataDH], [22,14,12,24,8,14,10,14,10], 'Todo', 'VIP_completo');
   }
 }
 
