@@ -707,7 +707,8 @@ function registrarGabito() {
   toast('toast-gabito', 'Guardado en Gabito VIP');
   document.getElementById('gabito-nombre').value = '';
   document.getElementById('gabito-id').value = '';
-  document.getElementById('gabito-entrada').value = '';
+  const _gd=new Date(); document.getElementById('gabito-entrada').value=`${_gd.getFullYear()}-${String(_gd.getMonth()+1).padStart(2,'0')}-${String(_gd.getDate()).padStart(2,'0')}`;
+  calcFechasGabito();
   document.getElementById('gabito-preview').textContent = '';
 }
 
@@ -1369,6 +1370,8 @@ const mm = String(today.getMonth()+1).padStart(2,'0');
 const dd = String(today.getDate()).padStart(2,'0');
 document.getElementById('mx-entrada').value = `${yyyy}-${mm}-${dd}`;
 document.getElementById('dh-entrada').value = `${yyyy}-${mm}-${dd}`;
+document.getElementById('gabito-entrada').value = `${yyyy}-${mm}-${dd}`;
+calcFechasGabito();
 calcFechasMX();
 </script>
 </body>
