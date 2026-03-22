@@ -320,7 +320,7 @@ td.muted{color:#4b5563;font-size:11px}
 <main>
   <div class="slabel">Análisis e inteligencia</div>
   <div class="grid2">
-    <div class="panel"><h3>Ingreso promedio por plan</h3><br><div id="analisis-plan-bars"></div></div>
+    <div class="panel"><h3>Precio promedio cobrado por plan</h3><div style="font-size:11px;color:#6b7280;margin-bottom:12px">Monto promedio real cobrado a tus subs por plan</div><div id="analisis-plan-bars"></div></div>
     <div class="panel"><h3>Días con más entradas</h3><br><div id="analisis-dow-bars"></div></div>
   </div>
   <div class="grid2">
@@ -816,8 +816,11 @@ function eliminarDH(i) {
 // ─── HEADER ─────────────────────────────────────────────────────────────────
 function updateHeader() {
   const actMX = mxData.filter(r => { const s = getStatus(r); return s === 'ACTIVO' || s === 'PRÓXIMO' || s === 'VENCE HOY'; }).length;
+  const actGabito = gabitoData.filter(r => { const s = getStatus(r); return s === 'ACTIVO' || s === 'PRÓXIMO' || s === 'VENCE HOY'; }).length;
   document.getElementById('hMX').textContent = `MX VIP: ${actMX} activos`;
   document.getElementById('hDH').textContent = `DarkHub: ${dhData.length} miembros`;
+  document.getElementById('hGabito').textContent = `Gabito VIP: ${actGabito} activos`;
+  document.getElementById('hDate').textContent = new Date().toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'});
 }
 
 // ─── DASHBOARD ──────────────────────────────────────────────────────────────
@@ -829,7 +832,7 @@ function renderDashboard() {
     try { return new Date(2000+parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0])); } catch(e){ return null; }
   };
   const monthKey = d => d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : null;
-  const monthLabel = k => { const [y,m]=k.split('-'); return new Date(+y,+m-1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}); };
+  const monthLabel = k => { const [y,m]=k.split('-'); const d=new Date(+y,+m-1); return d.toLocaleDateString('es-MX',{month:'short'}).replace('.','') + ' ' + y; };
 
   // --- status counts
   const statusCount = {};
@@ -989,13 +992,14 @@ function renderDashboard() {
 let _analisisCharts = {};
 function renderAnalisis() {
   // ─ Ingreso promedio por plan
+  const normPlan = p => p ? p.trim().charAt(0).toUpperCase() + p.trim().slice(1).toLowerCase() : 'Otro';
   const planRevMap = {}, planCntMap = {};
   mxData.forEach(r => {
     if (!r.plan || !r.monto) return;
     planRevMap[r.plan] = (planRevMap[r.plan]||0) + r.monto;
     planCntMap[r.plan] = (planCntMap[r.plan]||0) + 1;
   });
-  const planDefs = [['2 semanas','#1D9E75'],['1 mes','#378ADD'],['2 meses','#7F77DD'],['Permanente','#0F6E56']];
+  const planDefs = [['2 semanas','#1D9E75'],['1 mes','#378ADD'],['2 meses','#7F77DD'],['Permanente','#0F6E56']].map(([p,c])=>[normPlan(p),c]);
   const avgs = planDefs.map(([p]) => planCntMap[p] > 0 ? Math.round(planRevMap[p]/planCntMap[p]) : 0);
   const maxAvg = Math.max(...avgs, 1);
   document.getElementById('analisis-plan-bars').innerHTML = planDefs.map(([p,c],i) => avgs[i] === 0 ? '' :
