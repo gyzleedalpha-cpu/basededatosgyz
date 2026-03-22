@@ -204,10 +204,13 @@ td.muted{color:#4b5563;font-size:11px}
       <div class="field"><label>ID Telegram</label><input type="text" id="dh-id" placeholder="123456789"></div>
       <div class="field"><label>Monto ($)</label><input type="number" id="dh-monto" placeholder="200"></div>
     </div>
-    <div class="field"><label>Método de pago</label>
-      <select id="dh-metodo">
-        <option>Transferencia MX</option><option>PayPal</option><option>Efectivo</option><option>Stripe</option><option>Crypto</option>
-      </select>
+    <div class="row2">
+      <div class="field"><label>Método de pago</label>
+        <select id="dh-metodo">
+          <option>Transferencia MX</option><option>PayPal</option><option>Efectivo</option><option>Stripe</option><option>Crypto</option>
+        </select>
+      </div>
+      <div class="field"><label>Fecha de ingreso</label><input type="date" id="dh-entrada"></div>
     </div>
     <button class="btn-primary" onclick="registrarDH()">Guardar en DarkHub</button>
   </div>
@@ -318,10 +321,10 @@ td.muted{color:#4b5563;font-size:11px}
 <!-- ===== ANÁLISIS ===== -->
 <div id="tab-analisis" class="tab-content">
 <main>
-  <div class="slabel">Análisis e inteligencia</div>
+  <div class="slabel">Métricas de negocio</div>
   <div class="grid2">
-    <div class="panel"><h3>Precio promedio cobrado por plan</h3><div style="font-size:11px;color:#6b7280;margin-bottom:12px">Monto promedio real cobrado a tus subs por plan</div><div id="analisis-plan-bars"></div></div>
-    <div class="panel"><h3>Días con más entradas</h3><br><div id="analisis-dow-bars"></div></div>
+    <div class="panel"><h3>Precio promedio cobrado por plan</h3><div style="font-size:11px;color:#6b7280;margin-bottom:12px">Monto promedio real cobrado por plan (MX VIP)</div><div id="analisis-plan-bars"></div></div>
+    <div class="panel"><h3>Métodos de pago más usados</h3><br><div class="chart-wrap" style="height:180px"><canvas id="chartMetodos"></canvas></div></div>
   </div>
   <div class="grid2">
     <div class="panel"><h3>Ingresos por tipo de plan</h3><div class="chart-wrap"><canvas id="chartRevPlan"></canvas></div>
@@ -330,6 +333,26 @@ td.muted{color:#4b5563;font-size:11px}
     <div class="panel"><h3>Usuarios en ambos grupos</h3><div class="chart-wrap"><canvas id="chartCruce"></canvas></div>
       <div class="stat-row" id="analisis-cruce-totals"></div>
     </div>
+  </div>
+
+  <div class="slabel">Retención y actividad</div>
+  <div class="grid2">
+    <div class="panel"><h3>Días con más ventas (todos los grupos)</h3><br><div id="analisis-dow-bars"></div></div>
+    <div class="panel"><h3>Retención MX VIP</h3>
+      <div style="font-size:11px;color:#6b7280;margin-bottom:14px">Cuántos subs se mantienen activos vs los que salen</div>
+      <div id="analisis-retencion"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Proyección próximo mes</h3>
+    <div style="font-size:11px;color:#6b7280;margin-bottom:14px">Estimación basada en tendencia de los últimos 3 meses</div>
+    <div id="analisis-proyeccion"></div>
+  </div>
+
+  <div class="slabel">Estrategias recomendadas</div>
+  <div class="panel">
+    <h3>Inteligencia de ventas</h3>
+    <div id="analisis-estrategias"></div>
   </div>
   <div class="panel"><h3>Conclusiones clave</h3>
     <div id="analisis-insights"></div>
@@ -629,8 +652,9 @@ function registrarMX() {
   document.getElementById('mx-nombre').value = '';
   document.getElementById('mx-id').value = '';
   document.getElementById('mx-monto').value = '';
-  entradaEl.value = '';
-  document.getElementById('mx-preview').textContent = '';
+  const _td = new Date(); entradaEl.value = `${_td.getFullYear()}-${String(_td.getMonth()+1).padStart(2,'0')}-${String(_td.getDate()).padStart(2,'0')}`;
+  entradaEl._eDate = null; entradaEl._sDate = null;
+  calcFechasMX();
   updateHeader();
   renderMXTable();
 }
@@ -643,13 +667,16 @@ function registrarDH() {
   const metodo = document.getElementById('dh-metodo').value;
   if (!nombre) { alert('Falta el nombre'); return; }
   if (!monto) { alert('Falta el monto'); return; }
-  const rec = { grupo:'DarkHub', nombre, id, plan:'Permanente', fechas:'Permanente', entrada: fmtDate(new Date()), salida:'Permanente', monto: parseFloat(monto), metodo, status:'PERMANENTE', historico: false, ts: new Date().toISOString() };
+  const dhEntEl = document.getElementById('dh-entrada');
+  const dhEntVal = dhEntEl.value ? fmtDate(new Date(dhEntEl.value + 'T12:00:00')) : fmtDate(new Date());
+  const rec = { grupo:'DarkHub', nombre, id, plan:'Permanente', fechas:'Permanente', entrada: dhEntVal, salida:'Permanente', monto: parseFloat(monto), metodo, status:'PERMANENTE', historico: false, ts: new Date().toISOString() };
   dhData.push(rec);
   saveData();
   toast('toast-dh', 'Guardado en DarkHub');
   document.getElementById('dh-nombre').value = '';
   document.getElementById('dh-id').value = '';
   document.getElementById('dh-monto').value = '';
+  const _dhd = new Date(); dhEntEl.value = `${_dhd.getFullYear()}-${String(_dhd.getMonth()+1).padStart(2,'0')}-${String(_dhd.getDate()).padStart(2,'0')}`;
   updateHeader();
   renderDHTable();
 }
@@ -1060,6 +1087,72 @@ function renderAnalisis() {
     vencidos > 0 ? `<div class="insight yellow"><div class="it">${vencidos} suscriptores vencidos son ingresos potenciales</div><p>Si 30% renuevan a $150 = $${Math.round(vencidos*0.3*150).toLocaleString()} adicionales. Vale un mensaje de reactivación.</p></div>` : '',
     `<div class="insight green"><div class="it">Total histórico acumulado: $${totalIngMX.toLocaleString()}</div><p>MX VIP lleva ${mxData.length} registros totales en la base de datos.</p></div>`
   ].join('');
+
+  // ─ Métodos de pago
+  const metodoCount = {};
+  [...mxData, ...dhData, ...gabitoData].forEach(r => { const m = r.metodo || 'Sin registrar'; metodoCount[m] = (metodoCount[m]||0)+1; });
+  const metLabels = Object.keys(metodoCount).sort((a,b) => metodoCount[b]-metodoCount[a]);
+  if (window._chartMetodos) window._chartMetodos.destroy();
+  window._chartMetodos = new Chart(document.getElementById('chartMetodos'), {
+    type: 'doughnut',
+    data: { labels: metLabels, datasets: [{ data: metLabels.map(k=>metodoCount[k]), backgroundColor: ['#1D9E75','#378ADD','#7F77DD','#0F6E56','#f59e0b','#ef4444'], borderWidth: 0, hoverOffset: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'right', labels: { font: { size: 10 }, boxWidth: 8, padding: 8 } }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed} pagos` } } } }
+  });
+
+  // ─ Retención MX VIP
+  const activos = mxData.filter(r => { const s=getStatus(r); return s==='ACTIVO'||s==='PRÓXIMO'||s==='VENCE HOY'; }).length;
+  const permanentesMX = mxData.filter(r => getStatus(r)==='PERMANENTE').length;
+  const vencidosN = mxData.filter(r => getStatus(r)==='VENCIDO').length;
+  const totalMXN = mxData.length;
+  const pctActivo = totalMXN > 0 ? Math.round((activos+permanentesMX)/totalMXN*100) : 0;
+  const pctVencido = totalMXN > 0 ? Math.round(vencidosN/totalMXN*100) : 0;
+  document.getElementById('analisis-retencion').innerHTML = `
+    <div class="plan-row"><div class="plan-label">Activos / Próximos</div><div class="plan-bar-wrap"><div class="plan-bar" style="width:${pctActivo}%;background:#1D9E75"></div></div><div class="plan-count">${activos+permanentesMX} <span style="color:#6b7280;font-size:11px">(${pctActivo}%)</span></div></div>
+    <div class="plan-row"><div class="plan-label">Vencidos</div><div class="plan-bar-wrap"><div class="plan-bar" style="width:${pctVencido}%;background:#ef4444"></div></div><div class="plan-count">${vencidosN} <span style="color:#6b7280;font-size:11px">(${pctVencido}%)</span></div></div>
+    <div style="margin-top:14px;padding:12px;background:rgba(29,158,117,.08);border-radius:8px;font-size:12px;color:#9ca3af">
+      <strong style="color:#1D9E75">${pctActivo}% de retención</strong> — ${pctActivo>=70?'Excelente, sigue así.':pctActivo>=50?'Bueno, pero hay margen para mejorar.':'Necesitas estrategias de retención.'}
+      ${vencidosN>0?`<br><strong style="color:#f59e0b">${vencidosN} vencidos</strong> = oportunidad de $${Math.round(vencidosN*0.3*150).toLocaleString()} si el 30% renueva.`:''}
+    </div>`;
+
+  // ─ Proyección próximo mes
+  const parseEnt2 = r => { if(!r.entrada)return null; const p=r.entrada.split('/'); if(p.length!==3)return null; try{return new Date(2000+parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}catch(e){return null;} };
+  const monthKey2 = d => d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:null;
+  const ingByMonth = {};
+  [...mxData,...dhData,...gabitoData].forEach(r=>{ const k=monthKey2(parseEnt2(r)); if(k) ingByMonth[k]=(ingByMonth[k]||0)+r.monto; });
+  const sortedMonths = Object.keys(ingByMonth).sort().slice(-3);
+  const last3 = sortedMonths.map(k=>ingByMonth[k]);
+  const proyeccion = last3.length >= 2 ? Math.round(last3.reduce((a,b)=>a+b,0)/last3.length) : null;
+  const tendencia = last3.length >= 2 ? last3[last3.length-1] - last3[0] : 0;
+  const pctTend = last3[0] > 0 ? Math.round(tendencia/last3[0]*100) : 0;
+  document.getElementById('analisis-proyeccion').innerHTML = proyeccion ? `
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div style="text-align:center;padding:16px 24px;background:rgba(29,158,117,.1);border-radius:12px;border:1px solid rgba(29,158,117,.3)">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:4px">Proyección</div>
+        <div style="font-size:28px;font-weight:700;color:#1D9E75">$${proyeccion.toLocaleString()}</div>
+        <div style="font-size:11px;color:#6b7280">próximo mes (promedio 3 meses)</div>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:13px;color:#9ca3af;margin-bottom:8px">Últimos ${last3.length} meses: ${last3.map(v=>'$'+Math.round(v).toLocaleString()).join(' → ')}</div>
+        <div style="font-size:13px;${tendencia>=0?'color:#1D9E75':'color:#ef4444'}">${tendencia>=0?'↑ Tendencia positiva':' ↓ Tendencia negativa'}: ${tendencia>=0?'+':''}${pctTend}% vs hace ${last3.length} meses</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:8px">${tendencia>0?'Vas creciendo — mantén la cadencia de publicación y ofertas.':tendencia===0?'Ingresos estables — busca nuevos canales para crecer.':'Revisa qué cambió — ¿bajó la frecuencia de publicación?'}</div>
+      </div>
+    </div>` : `<div style="color:#6b7280;font-size:13px">Agrega más datos históricos para ver la proyección.</div>`;
+
+  // ─ Estrategias de venta
+  const mejorDia = topDow.day;
+  const tieneAmbos = ambos > 0;
+  const planTop = planDefs.reduce((top, [p]) => (planCntMap[p]||0) > (planCntMap[top]||0) ? p : top, planDefs[0][0]);
+  const estrategias = [
+    { icon:'📅', titulo: `Publica los ${mejorDia}s`, desc: `Tu mejor día de captación. Programa contenido atractivo ese día — promociones flash, testimonios, o contenido exclusivo para generar urgencia.` },
+    tieneAmbos ? { icon:'⭐', titulo: `${ambos} usuarios VIP doble — trátelos especial`, desc: `Están en MX VIP y DarkHub. Son los más comprometidos: dales acceso anticipado, descuentos de renovación o contenido extra para que no se vayan.` } : null,
+    vencidos > 5 ? { icon:'🔄', titulo: `Campaña de reactivación para ${vencidos} vencidos`, desc: `Mensaje directo por Telegram: "Te extrañamos, renueva con $20 de descuento hoy". Con un 25% de conversión generarías $${Math.round(vencidos*0.25*130).toLocaleString()} extra.` } : null,
+    { icon:'📦', titulo: `El plan "${planTop}" es el más popular`, desc: `Optimiza tu pitch para ese plan. Ofrece un descuento por pagar 2 periodos adelantado — conviertes el mismo cliente en ingreso doble.` },
+    { icon:'💰', titulo: `Precio promedio óptimo`, desc: `Tu ticket promedio MX VIP es $${Math.round(mxData.reduce((a,r)=>a+r.monto,0)/Math.max(mxData.length,1))}. Prueba subir $20-30 al siguiente ciclo — muchos subs no cancelan por ese margen.` },
+    { icon:'🔗', titulo: `Cross-sell MX VIP → DarkHub`, desc: `${activos} subs de MX VIP que aún no están en DarkHub son clientes calientes. Ofréceles acceso a DarkHub como "upgrade exclusivo para subs activos".` },
+  ].filter(Boolean);
+  document.getElementById('analisis-estrategias').innerHTML = estrategias.map(e =>
+    `<div class="insight blue" style="margin-bottom:10px"><div class="it">${e.icon} ${e.titulo}</div><p>${e.desc}</p></div>`
+  ).join('');
 }
 
 // ─── IMPORTAR ────────────────────────────────────────────────────────────────
@@ -1275,6 +1368,7 @@ const yyyy = today.getFullYear();
 const mm = String(today.getMonth()+1).padStart(2,'0');
 const dd = String(today.getDate()).padStart(2,'0');
 document.getElementById('mx-entrada').value = `${yyyy}-${mm}-${dd}`;
+document.getElementById('dh-entrada').value = `${yyyy}-${mm}-${dd}`;
 calcFechasMX();
 </script>
 </body>
