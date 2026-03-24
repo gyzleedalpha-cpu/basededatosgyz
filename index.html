@@ -1630,6 +1630,7 @@ function applyWidgetState(){
 }
 
 function renderDashboard() {
+  try {
   renderWidgetToggles();
   applyWidgetState();
 
@@ -1834,6 +1835,7 @@ function renderDashboard() {
     const cls=r._dias===0?'pill pill-0':r._dias<=3?'pill pill-low':'pill pill-ok';
     return `<tr><td><strong>${r.nombre}</strong></td><td class="muted">${r.fechas}</td><td>${statusBadge(r._status)}</td><td style="text-align:right"><span class="${cls}">${txt}</span></td></tr>`;
   }).join('');
+  } catch(err) { console.error('Dashboard error:', err); document.getElementById('dash-cards').innerHTML = `<div style='color:red;padding:16px;font-size:12px'>Error: ${err.message}<br><pre>${err.stack}</pre></div>`; }
 }
 
 // ─── ANÁLISIS CHARTS ─────────────────────────────────────────────────────────
@@ -2190,6 +2192,7 @@ loadData();
 initFirebase();
 updateHeader();
 renderMXTable();
+renderDashboard();
 
 // Set today as default date
 const today = new Date();
@@ -2197,7 +2200,7 @@ const yyyy = today.getFullYear();
 const mm = String(today.getMonth()+1).padStart(2,'0');
 const dd = String(today.getDate()).padStart(2,'0');
 document.getElementById('mx-entrada').value = `${yyyy}-${mm}-${dd}`;
-document.getElementById('dh-entrada').value = `${yyyy}-${mm}-${dd}`;
+if(document.getElementById('dh-entrada')) document.getElementById('dh-entrada').value = `${yyyy}-${mm}-${dd}`;
 document.getElementById('gabito-entrada').value = `${yyyy}-${mm}-${dd}`;
 calcFechasGabito();
 calcFechasMX();
