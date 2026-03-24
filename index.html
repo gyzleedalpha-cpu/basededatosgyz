@@ -30,9 +30,12 @@
   --text-1:#eeedf8;
   --text-2:#8a89a8;
   --text-3:#3e3d5a;
-  --gold:#c9a84c;
-  --gold2:#e8d08a;
-  --gold3:rgba(201,168,76,0.12);
+  --gold:#6366f1;
+  --gold2:#818cf8;
+  --gold3:rgba(99,102,241,0.12);
+  --accent:#3b82f6;
+  --accent2:#60a5fa;
+  --accent3:rgba(59,130,246,0.12);
   --purple:#8b5cf6;
   --purple2:#a78bfa;
   --emerald:#10b981;
@@ -76,7 +79,7 @@ header h1{
   font-weight:700;
   letter-spacing:1.5px;
   text-transform:uppercase;
-  background:linear-gradient(135deg, #a0825a 0%, #e8d08a 35%, #c9a84c 60%, #e8d08a 100%);
+  background:linear-gradient(135deg, #6366f1 0%, #818cf8 35%, #3b82f6 60%, #818cf8 100%);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
@@ -85,10 +88,10 @@ header h1{
 .hinfo span{color:var(--text-2);font-weight:500}
 .export-btn{
   padding:7px 16px;
-  background:linear-gradient(135deg, rgba(201,168,76,0.14), rgba(201,168,76,0.07));
-  border:1px solid rgba(201,168,76,0.28);
+  background:linear-gradient(135deg, rgba(99,102,241,0.14), rgba(99,102,241,0.07));
+  border:1px solid rgba(99,102,241,0.28);
   border-radius:9px;
-  color:var(--gold2);
+  color:var(--accent2);
   font-size:11px;
   font-weight:600;
   cursor:pointer;
@@ -98,9 +101,9 @@ header h1{
   white-space:nowrap;
 }
 .export-btn:hover{
-  background:linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.12));
-  border-color:rgba(201,168,76,0.45);
-  box-shadow:0 0 24px rgba(201,168,76,0.12);
+  background:linear-gradient(135deg, rgba(99,102,241,0.22), rgba(99,102,241,0.12));
+  border-color:rgba(99,102,241,0.45);
+  box-shadow:0 0 24px rgba(99,102,241,0.12);
 }
 
 /* ── Tabs ── */
@@ -131,7 +134,7 @@ header h1{
   font-family:inherit;
 }
 .tab-btn:hover{color:var(--text-2)}
-.tab-btn.active{color:var(--gold2);border-bottom-color:var(--gold)}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--gold)}
 
 /* ── Layout ── */
 .tab-content{display:none}
@@ -378,7 +381,7 @@ td.muted{color:var(--text-3);font-size:11px}
   margin-bottom:16px;
   background:rgba(139,92,246,0.02);
 }
-.import-zone:hover{border-color:rgba(139,92,246,0.35);background:rgba(139,92,246,0.04)}
+.import-zone:hover{border-color:rgba(139,92,246,0.35);background:rgba(59,130,246,0.06)}
 .import-zone p{font-size:12px;color:var(--text-3);margin-top:8px}
 .search-input{
   width:100%;
@@ -482,20 +485,20 @@ td.muted{color:var(--text-3);font-size:11px}
 .orb1{
   width:600px;height:600px;
   top:-200px;left:-100px;
-  background:radial-gradient(circle, #6d28d9, #4f46e5);
+  background:radial-gradient(circle, #3b82f6, #6366f1);
   animation:orb1 14s ease-in-out infinite;
 }
 .orb2{
   width:500px;height:500px;
   bottom:-150px;right:-100px;
-  background:radial-gradient(circle, #0d9488, #10b981);
+  background:radial-gradient(circle, #4f46e5, #7c3aed);
   animation:orb2 18s ease-in-out infinite;
   opacity:.12;
 }
 .orb3{
   width:400px;height:400px;
   top:40%;left:50%;
-  background:radial-gradient(circle, #7c3aed, #c026d3);
+  background:radial-gradient(circle, #2563eb, #3b82f6);
   animation:orb3 22s ease-in-out infinite;
   opacity:.08;
 }
@@ -508,7 +511,7 @@ td.muted{color:var(--text-3);font-size:11px}
   pointer-events:none;
   z-index:1;
   top:0;left:0;
-  background:radial-gradient(circle, rgba(139,92,246,0.12) 0%, rgba(139,92,246,0.04) 40%, transparent 70%);
+  background:radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(59,130,246,0.06) 40%, transparent 70%);
   transform:translate(-50%,-50%);
   transition:transform .08s linear, opacity .3s;
   opacity:0;
@@ -528,36 +531,231 @@ td.muted{color:var(--text-3);font-size:11px}
   box-shadow:0 0 8px rgba(139,92,246,0.8);
 }
 body>*:not(.bg-orbs):not(#cursor-glow):not(#cursor-dot){position:relative;z-index:10}
+
+/* ══════════════════════════════════════
+   SIDEBAR LAYOUT
+══════════════════════════════════════ */
+.app-layout{display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{
+  width:230px;
+  flex-shrink:0;
+  background:rgba(7,6,18,0.97);
+  border-right:1px solid var(--border);
+  position:fixed;
+  top:0;left:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  z-index:300;
+  backdrop-filter:blur(24px);
+}
+.sb-logo{
+  display:flex;align-items:center;gap:12px;
+  padding:22px 20px 18px;
+  border-bottom:1px solid var(--border);
+}
+.sb-logo-icon{
+  width:36px;height:36px;
+  background:linear-gradient(135deg,#7c3aed,#4f46e5);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:800;color:#fff;
+  box-shadow:0 4px 16px rgba(124,58,237,0.35);
+  flex-shrink:0;
+}
+.sb-logo-title{font-size:13px;font-weight:700;color:var(--text-1);line-height:1.2}
+.sb-logo-sub{font-size:10px;color:var(--text-3);margin-top:1px;letter-spacing:.3px}
+
+.sb-nav{flex:1;padding:16px 10px;overflow-y:auto;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{display:none}
+.sb-section-label{
+  font-size:9px;font-weight:600;color:var(--text-3);
+  letter-spacing:1px;text-transform:uppercase;
+  padding:0 10px 8px;
+}
+.sb-item{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:9px 10px;
+  border:none;background:none;
+  color:var(--text-2);
+  font-size:12.5px;font-weight:500;
+  font-family:inherit;
+  border-radius:8px;
+  cursor:pointer;
+  text-align:left;
+  transition:all .18s;
+  position:relative;
+  margin-bottom:2px;
+}
+.sb-item:hover{background:rgba(255,255,255,0.04);color:var(--text-1)}
+.sb-item.active{
+  background:linear-gradient(135deg,rgba(139,92,246,0.18),rgba(99,102,241,0.1));
+  color:var(--purple2);
+  font-weight:600;
+}
+.sb-item.active::before{
+  content:'';
+  position:absolute;left:0;top:20%;bottom:20%;
+  width:3px;border-radius:0 3px 3px 0;
+  background:var(--purple);
+}
+.sb-icon{width:16px;height:16px;flex-shrink:0;opacity:.8}
+.sb-item.active .sb-icon{opacity:1}
+.sb-badge{
+  margin-left:auto;
+  font-size:9.5px;font-weight:700;
+  background:rgba(139,92,246,0.15);
+  color:var(--purple2);
+  padding:2px 7px;border-radius:20px;
+  min-width:28px;text-align:center;
+}
+.sb-footer{
+  padding:16px 20px;
+  border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:6px;
+}
+
+/* ── Main Area ── */
+.app-main{
+  margin-left:230px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+
+/* ── Topbar ── */
+.topbar{
+  height:58px;
+  background:rgba(8,7,20,0.95);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+  position:sticky;top:0;z-index:200;
+  backdrop-filter:blur(24px);
+  gap:20px;
+}
+.topbar-left{flex:1;max-width:380px}
+.topbar-search{
+  display:flex;align-items:center;gap:9px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:8px 14px;
+  transition:border-color .2s;
+}
+.topbar-search:focus-within{border-color:rgba(139,92,246,0.35)}
+.topbar-search svg{color:var(--text-3);flex-shrink:0}
+.topbar-search input{
+  border:none;background:none;outline:none;
+  color:var(--text-1);font-size:12.5px;font-family:inherit;
+  width:100%;
+}
+.topbar-search input::placeholder{color:var(--text-3)}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.topbar-stats{display:flex;gap:14px;align-items:center}
+.ts-item{
+  font-size:11px;color:var(--text-2);font-weight:500;
+  padding:5px 10px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:7px;
+  white-space:nowrap;
+}
+
+/* ── Override old layout ── */
+header{display:none!important}
+.tabs-bar{display:none!important}
+.tab-content.active{display:block;animation:fadeUp .25s ease}
+main{max-width:1200px;margin:0 auto;padding:28px 28px}
+
+/* ── Responsive sidebar ── */
+@media(max-width:768px){
+  .sidebar{width:200px}
+  .app-main{margin-left:200px}
+  .topbar-stats{display:none}
+}
+
 </style>
 </head>
 <body>
 <div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
 <div id="cursor-glow"></div>
 <div id="cursor-dot"></div>
-<header>
-  <h1>VIP Manager</h1>
-  <div style="display:flex;align-items:center;gap:16px">
-    <div class="hinfo">
-      <span id="hMX">MX VIP: —</span>
-      <span id="hDH">DarkHub: —</span>
-      <span id="hGabito">Gabito VIP: —</span>
-      <span id="hDate"></span>
+<div class="app-layout">
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">V</div>
+    <div>
+      <div class="sb-logo-title">VIP Manager</div>
+      <div class="sb-logo-sub">Panel de control</div>
     </div>
-    <div class="sync-ind"><span class="sdot" id="sync-dot"></span><span id="sync-text">Local</span></div>
-    <button onclick="exportar('todos')" class="export-btn">Exportar Excel</button>
   </div>
-</header>
-<div class="tabs-bar">
-  <button class="tab-btn active" onclick="switchTab('mxvip',this)">MX VIP</button>
-  <button class="tab-btn" onclick="switchTab('darkhub',this)">DarkHub</button>
-  <button class="tab-btn" onclick="switchTab('gabitovip',this)">Gabito VIP</button>
-  <button class="tab-btn" onclick="switchTab('dashboard',this)">Dashboard</button>
-  <button class="tab-btn" onclick="switchTab('analisis',this)">Análisis</button>
-  <button class="tab-btn" onclick="switchTab('importar',this)">Importar / Exportar</button>
-</div>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Principal</div>
+    <button class="sb-item active" onclick="switchTab('dashboard',this)" data-tab="dashboard">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </button>
+    <div class="sb-section-label" style="margin-top:16px">Grupos</div>
+    <button class="sb-item" onclick="switchTab('mxvip',this)" data-tab="mxvip">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      MX VIP
+      <span class="sb-badge" id="sb-mx-badge">—</span>
+    </button>
+    <button class="sb-item" onclick="switchTab('darkhub',this)" data-tab="darkhub">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      DarkHub
+      <span class="sb-badge" id="sb-dh-badge">—</span>
+    </button>
+    <button class="sb-item" onclick="switchTab('gabitovip',this)" data-tab="gabitovip">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Gabito VIP
+      <span class="sb-badge" id="sb-gabito-badge">—</span>
+    </button>
+    <div class="sb-section-label" style="margin-top:16px">Herramientas</div>
+    <button class="sb-item" onclick="switchTab('analisis',this)" data-tab="analisis">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Análisis
+    </button>
+    <button class="sb-item" onclick="switchTab('importar',this)" data-tab="importar">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      Importar / Exportar
+    </button>
+  </nav>
+  <div class="sb-footer">
+    <div class="sync-ind"><span class="sdot" id="sync-dot"></span><span id="sync-text">Local</span></div>
+    <span id="hDate" style="font-size:10px;color:var(--text-3)"></span>
+  </div>
+</aside>
+<!-- ══ MAIN ══ -->
+<div class="app-main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar en todos los grupos..." id="global-search" oninput="globalSearch(this.value)">
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-stats">
+        <span id="hMX" class="ts-item">MX VIP: —</span>
+        <span id="hDH" class="ts-item">DarkHub: —</span>
+        <span id="hGabito" class="ts-item">Gabito VIP: —</span>
+      </div>
+      <button onclick="exportar('todos')" class="export-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar Excel
+      </button>
+    </div>
+  </div>
 
 <!-- ===== MX VIP ===== -->
-<div id="tab-mxvip" class="tab-content active">
+<div id="tab-mxvip" class="tab-content">
 <main>
   <div class="slabel">Nuevo registro — MX VIP</div>
   <div class="panel">
@@ -691,43 +889,106 @@ body>*:not(.bg-orbs):not(#cursor-glow):not(#cursor-dot){position:relative;z-inde
 </div>
 
 <!-- ===== DASHBOARD ===== -->
-<div id="tab-dashboard" class="tab-content">
+<div id="tab-dashboard" class="tab-content active">
 <main>
-  <div class="slabel">KPIs principales</div>
-  <div class="cards" id="dash-cards"></div>
-  <div class="cards" id="dash-cards2" style="margin-top:0"></div>
-
-  <div class="slabel" style="margin-top:16px">Ingresos combinados por mes</div>
-  <div class="panel">
-    <div class="chart-wrap" style="height:240px"><canvas id="chartIngMes"></canvas></div>
-    <div class="stat-row" id="dash-ing-totals"></div>
+  <!-- Top controls -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:20px;font-weight:700;color:var(--text-1);margin-bottom:2px">Dashboard</h2>
+      <p style="font-size:12px;color:var(--text-2)">Track your sales and performance</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <select id="dash-period" onchange="renderDashboard()" style="padding:7px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:11px;font-family:inherit;cursor:pointer">
+        <option value="month">This month</option>
+        <option value="year">This year</option>
+        <option value="all" selected>All time</option>
+      </select>
+      <button class="export-btn" onclick="toggleWidgets()" style="font-size:11px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Widget
+      </button>
+    </div>
   </div>
 
-  <div class="grid2">
-    <div class="panel">
+  <!-- Widget toggles (hidden by default) -->
+  <div id="widget-panel" style="display:none;margin-bottom:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px">
+    <div style="font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Mostrar / Ocultar Widgets</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px" id="widget-toggles"></div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="cards" id="dash-cards" style="grid-template-columns:repeat(4,1fr)"></div>
+
+  <!-- Row 2: Area chart + Sales Performance donut -->
+  <div class="grid2" style="margin-top:16px" id="w-analytics">
+    <div class="panel" style="flex:2">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div>
+          <h3>Analytics</h3>
+          <div id="dash-analytics-total" style="font-size:22px;font-weight:700;color:var(--accent2);margin-top:4px">$0</div>
+        </div>
+        <div id="dash-analytics-change" style="font-size:11px;padding:4px 10px;border-radius:6px;font-weight:600"></div>
+      </div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chartAreaMes"></canvas></div>
+    </div>
+    <div class="panel" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <h3 style="align-self:flex-start">Sales Performance</h3>
+      <div style="position:relative;width:160px;height:160px;margin:16px 0">
+        <canvas id="chartPerfDonut"></canvas>
+        <div id="dash-perf-pct" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <span style="font-size:28px;font-weight:800;color:var(--text-1)">0%</span>
+          <span style="font-size:10px;color:var(--text-2)">Since last month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Heatmap + Top Groups -->
+  <div class="grid2" style="margin-top:16px">
+    <div class="panel" id="w-heatmap">
+      <h3>Activity Heatmap</h3>
+      <div style="font-size:20px;font-weight:700;color:var(--text-1);margin:6px 0" id="dash-heatmap-total">0</div>
+      <div id="dash-heatmap" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:10px"></div>
+    </div>
+    <div class="panel" id="w-topgroups">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3>Top Groups</h3>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Group</th><th>Members</th><th style="text-align:right">Revenue</th><th style="text-align:right">Share</th></tr></thead>
+        <tbody id="dash-topgroups"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- Row 4: Subs por mes + Días -->
+  <div class="grid2" style="margin-top:16px">
+    <div class="panel" id="w-subs">
       <h3>Suscripciones vendidas por mes</h3>
       <div class="chart-wrap" style="height:200px"><canvas id="chartSubsMes"></canvas></div>
       <div class="stat-row" id="dash-subs-totals"></div>
     </div>
-    <div class="panel">
+    <div class="panel" id="w-dow">
       <h3>Días con más ventas</h3>
       <div class="chart-wrap" style="height:200px"><canvas id="chartDow"></canvas></div>
     </div>
   </div>
 
-  <div class="grid2">
-    <div class="panel">
+  <!-- Row 5: Plans + DH amounts -->
+  <div class="grid2" style="margin-top:16px">
+    <div class="panel" id="w-plans">
       <h3>Planes MX VIP</h3>
       <div class="chart-wrap" style="height:200px"><canvas id="chartPlanes"></canvas></div>
     </div>
-    <div class="panel">
-      <h3>DarkHub por monto de acceso</h3>
+    <div class="panel" id="w-dhamounts">
+      <h3>DarkHub por monto</h3>
       <div class="chart-wrap" style="height:200px"><canvas id="chartDH"></canvas></div>
       <div class="stat-row" id="dash-dh-totals"></div>
     </div>
   </div>
 
-  <div class="panel">
+  <!-- Proximos a vencer -->
+  <div class="panel" style="margin-top:16px" id="w-proximos">
     <h3>Próximos a vencer</h3>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Nombre</th><th>Fechas</th><th>Estado</th><th style="text-align:right">Días</th></tr></thead>
@@ -981,13 +1242,28 @@ function showLSWarning() {
 // ─── TABS ───────────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn,.sb-item').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
+  // Also activate matching sidebar item
+  document.querySelectorAll('.sb-item[data-tab]').forEach(b => {
+    if (b.dataset.tab === name) b.classList.add('active');
+  });
   if (name === 'dashboard') renderDashboard();
-  if (name === 'gabitovip') renderGabitoTable();
+  if (name === 'gabitovip') { gabitoPage=1; renderGabitoTable(); }
   if (name === 'analisis') renderAnalisis();
   if (name === 'importar') renderMemStats();
+}
+
+function globalSearch(q) {
+  if (!q || q.length < 2) return;
+  const ql = q.toLowerCase();
+  const inMX = mxData.some(r => (r.nombre||'').toLowerCase().includes(ql) || (r.id||'').includes(q));
+  const inDH = dhData.some(r => (r.nombre||'').toLowerCase().includes(ql) || (r.id||'').includes(q));
+  const inGB = gabitoData.some(r => (r.nombre||'').toLowerCase().includes(ql) || (r.id||'').includes(q));
+  if (inMX) { switchTab('mxvip'); document.getElementById('mx-search').value=q; mxPage=1; renderMXTable(q); }
+  else if (inDH) { switchTab('darkhub'); document.getElementById('dh-search').value=q; dhPage=1; renderDHTable(q); }
+  else if (inGB) { switchTab('gabitovip'); document.getElementById('gabito-search').value=q; gabitoPage=1; renderGabitoTable(q); }
 }
 
 // ─── STATUS ─────────────────────────────────────────────────────────────────
@@ -1268,11 +1544,62 @@ function updateHeader() {
   document.getElementById('hMX').textContent = `MX VIP: ${actMX} activos`;
   document.getElementById('hDH').textContent = `DarkHub: ${dhData.length} miembros`;
   document.getElementById('hGabito').textContent = `Gabito VIP: ${actGabito} activos`;
+  // Sidebar badges
+  const sbMX = document.getElementById('sb-mx-badge'); if(sbMX) sbMX.textContent = actMX;
+  const sbDH = document.getElementById('sb-dh-badge'); if(sbDH) sbDH.textContent = dhData.length;
+  const sbGB = document.getElementById('sb-gabito-badge'); if(sbGB) sbGB.textContent = actGabito;
   document.getElementById('hDate').textContent = new Date().toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'});
 }
 
 // ─── DASHBOARD ──────────────────────────────────────────────────────────────
+function toggleWidgets(){
+  const p=document.getElementById('widget-panel');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+
+const _widgets = {
+  analytics:{label:'Analytics Chart',default:true},
+  heatmap:{label:'Activity Heatmap',default:true},
+  topgroups:{label:'Top Groups',default:true},
+  subs:{label:'Subs por Mes',default:true},
+  dow:{label:'Días con más ventas',default:true},
+  plans:{label:'Planes MX VIP',default:true},
+  dhamounts:{label:'DarkHub por Monto',default:true},
+  proximos:{label:'Próximos a Vencer',default:true}
+};
+function getWidgetState(){
+  try{const s=localStorage.getItem('dash_widgets');return s?JSON.parse(s):null;}catch(e){return null;}
+}
+function saveWidgetState(st){try{localStorage.setItem('dash_widgets',JSON.stringify(st));}catch(e){}}
+function renderWidgetToggles(){
+  const state=getWidgetState()||{};
+  document.getElementById('widget-toggles').innerHTML=Object.entries(_widgets).map(([k,w])=>{
+    const on=state[k]!==undefined?state[k]:w.default;
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);cursor:pointer;padding:4px 10px;background:${on?'rgba(99,102,241,0.1)':'rgba(255,255,255,0.03)'};border:1px solid ${on?'rgba(99,102,241,0.3)':'var(--border)'};border-radius:6px">
+      <input type="checkbox" ${on?'checked':''} onchange="toggleWidget('${k}',this.checked)" style="accent-color:#6366f1"> ${w.label}
+    </label>`;
+  }).join('');
+}
+function toggleWidget(k,on){
+  const state=getWidgetState()||{};
+  state[k]=on;saveWidgetState(state);
+  const el=document.getElementById('w-'+k);
+  if(el)el.style.display=on?'':'none';
+  renderWidgetToggles();
+}
+function applyWidgetState(){
+  const state=getWidgetState()||{};
+  Object.entries(_widgets).forEach(([k,w])=>{
+    const on=state[k]!==undefined?state[k]:w.default;
+    const el=document.getElementById('w-'+k);
+    if(el)el.style.display=on?'':'none';
+  });
+}
+
 function renderDashboard() {
+  renderWidgetToggles();
+  applyWidgetState();
+
   const parseEnt = r => {
     if (!r.entrada) return null;
     const p = r.entrada.split('/');
@@ -1280,157 +1607,197 @@ function renderDashboard() {
     try { return new Date(2000+parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0])); } catch(e){ return null; }
   };
   const monthKey = d => d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : null;
-  const monthLabel = k => { const [y,m]=k.split('-'); const d=new Date(+y,+m-1); return d.toLocaleDateString('es-MX',{month:'short'}).replace('.','') + ' ' + y; };
+  const monthLabel = k => { const [y,m]=k.split('-'); const d=new Date(+y,+m-1); return d.toLocaleDateString('es-MX',{month:'short'}) + ' ' + y; };
 
-  // --- status counts
+  // Period filter
+  const period = document.getElementById('dash-period').value;
+  const now = new Date();
+  const filterDate = r => {
+    if (period==='all') return true;
+    const d = parseEnt(r);
+    if (!d) return false;
+    if (period==='month') return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    if (period==='year') return d.getFullYear()===now.getFullYear();
+    return true;
+  };
+  const fMX = mxData.filter(filterDate), fDH = dhData.filter(filterDate), fGB = gabitoData.filter(filterDate);
+
+  // Status
   const statusCount = {};
-  mxData.forEach(r => { const s=getStatus(r); statusCount[s]=(statusCount[s]||0)+1; });
+  fMX.forEach(r => { const s=getStatus(r); statusCount[s]=(statusCount[s]||0)+1; });
   const activos = (statusCount['ACTIVO']||0)+(statusCount['PRÓXIMO']||0)+(statusCount['VENCE HOY']||0)+(statusCount['PERMANENTE']||0);
-  const gabitoStatusCount = {};
-  gabitoData.forEach(r => { const s=getStatus(r); gabitoStatusCount[s]=(gabitoStatusCount[s]||0)+1; });
-  const gabitoActivos = (gabitoStatusCount['ACTIVO']||0)+(gabitoStatusCount['PRÓXIMO']||0)+(gabitoStatusCount['VENCE HOY']||0);
 
-  // --- totals
-  const totalMX = mxData.reduce((a,r)=>a+r.monto,0);
-  const totalDH = dhData.reduce((a,r)=>a+r.monto,0);
-  const totalGabito = gabitoData.reduce((a,r)=>a+r.monto,0);
+  // Revenue
+  const totalMX = fMX.reduce((a,r)=>a+r.monto,0);
+  const totalDH = fDH.reduce((a,r)=>a+r.monto,0);
+  const totalGB = fGB.reduce((a,r)=>a+r.monto,0);
+  const totalAll = totalMX+totalDH+totalGB;
 
-  // --- monthly revenue (MX + DH)
-  const monthMX = {}, monthDH = {};
-  mxData.forEach(r => { const d=parseEnt(r); const k=monthKey(d); if(k){ monthMX[k]=(monthMX[k]||0)+r.monto; } });
-  dhData.forEach(r => { const d=parseEnt(r); const k=monthKey(d); if(k){ monthDH[k]=(monthDH[k]||0)+r.monto; } });
-  const monthGabito = {};
-  gabitoData.forEach(r => { const d=parseEnt(r); const k=monthKey(d); if(k){ monthGabito[k]=(monthGabito[k]||0)+r.monto; } });
-  const allMonths = [...new Set([...Object.keys(monthMX),...Object.keys(monthDH),...Object.keys(monthGabito)])].sort().slice(-8);
-  const ingMXvals = allMonths.map(k=>Math.round(monthMX[k]||0));
-  const ingDHvals = allMonths.map(k=>Math.round(monthDH[k]||0));
-  const ingGabitoVals = allMonths.map(k=>Math.round(monthGabito[k]||0));
-  const ingTotals = allMonths.map((_,i)=>ingMXvals[i]+ingDHvals[i]+ingGabitoVals[i]);
+  // Monthly
+  const monthMX={}, monthDH={}, monthGB={};
+  fMX.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) monthMX[k]=(monthMX[k]||0)+r.monto; });
+  fDH.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) monthDH[k]=(monthDH[k]||0)+r.monto; });
+  fGB.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) monthGB[k]=(monthGB[k]||0)+r.monto; });
+  const allMonths=[...new Set([...Object.keys(monthMX),...Object.keys(monthDH),...Object.keys(monthGB)])].sort().slice(-8);
 
-  // --- this month & last month
-  const thisMonthKey = monthKey(new Date());
-  const lastMonthDate = new Date(); lastMonthDate.setMonth(lastMonthDate.getMonth()-1);
-  const lastMonthKey = monthKey(lastMonthDate);
-  const ingThisMonth = (monthMX[thisMonthKey]||0)+(monthDH[thisMonthKey]||0)+(monthGabito[thisMonthKey]||0);
-  const ingLastMonth = (monthMX[lastMonthKey]||0)+(monthDH[lastMonthKey]||0)+(monthGabito[lastMonthKey]||0);
-  const crecimiento = ingLastMonth > 0 ? ((ingThisMonth-ingLastMonth)/ingLastMonth*100).toFixed(1) : null;
+  const thisK=monthKey(now);
+  const lastD=new Date();lastD.setMonth(lastD.getMonth()-1);
+  const lastK=monthKey(lastD);
+  const thisRev=(monthMX[thisK]||0)+(monthDH[thisK]||0)+(monthGB[thisK]||0);
+  const lastRev=(monthMX[lastK]||0)+(monthDH[lastK]||0)+(monthGB[lastK]||0);
+  const growth=lastRev>0?((thisRev-lastRev)/lastRev*100):thisRev>0?100:0;
 
-  // --- ticket promedio MX VIP (activos con monto)
-  const mxConMonto = mxData.filter(r=>r.monto>0);
-  const ticketMX = mxConMonto.length ? Math.round(mxConMonto.reduce((a,r)=>a+r.monto,0)/mxConMonto.length) : 0;
+  // ══ KPI CARDS ══
+  const sparkHTML = (data, color) => {
+    if(!data.length) return '';
+    const max=Math.max(...data,1);
+    return `<div style="display:flex;align-items:flex-end;gap:2px;height:28px;margin-top:8px">${data.slice(-6).map(v=>`<div style="width:6px;background:${color};border-radius:2px;height:${Math.max(4,v/max*100)}%;opacity:0.7"></div>`).join('')}</div>`;
+  };
+  const mxMonthly=allMonths.map(k=>monthMX[k]||0);
+  const dhMonthly=allMonths.map(k=>monthDH[k]||0);
+  const gbMonthly=allMonths.map(k=>monthGB[k]||0);
+  const totalMonthly=allMonths.map((_,i)=>mxMonthly[i]+dhMonthly[i]+gbMonthly[i]);
 
-  // --- mejor mes
-  let bestKey='', bestVal=0;
-  allMonths.forEach(k=>{ const v=(monthMX[k]||0)+(monthDH[k]||0)+(monthGabito[k]||0); if(v>bestVal){bestVal=v;bestKey=k;} });
-  const bestLabel = bestKey ? monthLabel(bestKey) : '—';
+  const changeHTML = (cur,prev) => {
+    if(!prev) return '<span style="font-size:10px;color:var(--text-3)">—</span>';
+    const pct=((cur-prev)/prev*100).toFixed(1);
+    const up=parseFloat(pct)>=0;
+    return `<span style="font-size:10px;font-weight:600;color:${up?'#10b981':'#ef4444'};background:${up?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)'};padding:2px 6px;border-radius:4px">${up?'+':''}${pct}%</span>`;
+  };
 
-  // --- subs por mes
-  const subsMX={}, subsDH={}, subsGabito={};
-  mxData.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) subsMX[k]=(subsMX[k]||0)+1; });
-  dhData.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) subsDH[k]=(subsDH[k]||0)+1; });
-  gabitoData.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) subsGabito[k]=(subsGabito[k]||0)+1; });
-  const allSubMonths=[...new Set([...Object.keys(subsMX),...Object.keys(subsDH),...Object.keys(subsGabito)])].sort().slice(-8);
-  const valsMX=allSubMonths.map(k=>subsMX[k]||0);
-  const valsDH=allSubMonths.map(k=>subsDH[k]||0);
-  const valsGabito=allSubMonths.map(k=>subsGabito[k]||0);
-  const valsTotal=allSubMonths.map((_,i)=>valsMX[i]+valsDH[i]+valsGabito[i]);
-  const mesMX=valsMX[valsMX.length-1]||0, mesDH=valsDH[valsDH.length-1]||0, mesGabito=valsGabito[valsGabito.length-1]||0;
-
-  // --- day of week (0=Dom, 1=Lun, ..., 6=Sab)
-  const dowLabels=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const dowCount=[0,0,0,0,0,0,0];
-  [...mxData,...dhData,...gabitoData].forEach(r=>{ const d=parseEnt(r); if(d) dowCount[d.getDay()]++; });
-
-  // --- plan distribution
-  const planCount={};
-  mxData.forEach(r=>{ const p=r.plan||'Otro'; planCount[p]=(planCount[p]||0)+1; });
-
-  // --- DarkHub by amount
-  const dhAmounts={};
-  dhData.forEach(r=>{ const k='$'+r.monto; dhAmounts[k]=(dhAmounts[k]||0)+1; });
-  const dhLabels=Object.keys(dhAmounts).sort((a,b)=>parseFloat(a.slice(1))-parseFloat(b.slice(1)));
-
-  // ══ CARDS ROW 1 ══
   document.getElementById('dash-cards').innerHTML = `
-    <div class="card green"><div class="lbl">Activos MX VIP</div><div class="val">${activos}</div><div class="sub">activos + próximos + perm.</div></div>
-    <div class="card teal"><div class="lbl">DarkHub</div><div class="val">${dhData.length}</div><div class="sub">miembros activos</div></div>
-    <div class="card blue"><div class="lbl">Ingresos este mes</div><div class="val">$${Math.round(ingThisMonth).toLocaleString()}</div><div class="sub">MX VIP + DarkHub</div></div>
-    <div class="card yellow"><div class="lbl">Próximos a vencer</div><div class="val">${statusCount['PRÓXIMO']||0}</div><div class="sub">esta semana</div></div>
-    <div class="card green"><div class="lbl">Gabito VIP</div><div class="val">${gabitoActivos}</div><div class="sub">activos + próximos</div></div>
+    <div class="card blue"><div style="display:flex;justify-content:space-between"><div class="lbl">Total Revenue</div>${changeHTML(thisRev,lastRev)}</div><div class="val">$${Math.round(totalAll).toLocaleString()}</div><div class="sub">All groups combined</div>${sparkHTML(totalMonthly,'#3b82f6')}</div>
+    <div class="card green"><div style="display:flex;justify-content:space-between"><div class="lbl">Active Subs</div></div><div class="val">${activos+fGB.filter(r=>getStatus(r)!=='VENCIDO').length}</div><div class="sub">MX VIP + Gabito</div>${sparkHTML(mxMonthly,'#10b981')}</div>
+    <div class="card purple"><div style="display:flex;justify-content:space-between"><div class="lbl">DarkHub Members</div></div><div class="val">${fDH.length}</div><div class="sub">Permanent access</div>${sparkHTML(dhMonthly,'#8b5cf6')}</div>
+    <div class="card teal"><div style="display:flex;justify-content:space-between"><div class="lbl">This Month</div>${changeHTML(thisRev,lastRev)}</div><div class="val">$${Math.round(thisRev).toLocaleString()}</div><div class="sub">${new Date().toLocaleDateString('es-MX',{month:'long',year:'numeric'})}</div>${sparkHTML(gbMonthly.length?gbMonthly:totalMonthly,'#14b8a6')}</div>
   `;
 
-  // ══ CARDS ROW 2 ══
-  const crecHtml = crecimiento !== null
-    ? `<div class="card ${parseFloat(crecimiento)>=0?'green':'red'}"><div class="lbl">Crecimiento vs mes anterior</div><div class="val">${parseFloat(crecimiento)>=0?'+':''}${crecimiento}%</div><div class="sub">en ingresos</div></div>`
-    : `<div class="card purple"><div class="lbl">Crecimiento</div><div class="val">—</div><div class="sub">sin datos mes anterior</div></div>`;
-  document.getElementById('dash-cards2').innerHTML = `
-    <div class="card purple"><div class="lbl">Ticket promedio MX VIP</div><div class="val">$${ticketMX.toLocaleString()}</div><div class="sub">por suscriptor</div></div>
-    <div class="card blue"><div class="lbl">Mejor mes</div><div class="val">${bestLabel}</div><div class="sub">$${Math.round(bestVal).toLocaleString()} ingresos</div></div>
-    <div class="card teal"><div class="lbl">Total histórico</div><div class="val">$${Math.round(totalMX+totalDH+totalGabito).toLocaleString()}</div><div class="sub">todos los grupos</div></div>
-    ${crecHtml}
-  `;
+  // ══ ANALYTICS AREA CHART ══
+  const areaData=allMonths.map(k=>(monthMX[k]||0)+(monthDH[k]||0)+(monthGB[k]||0));
+  document.getElementById('dash-analytics-total').textContent='$'+Math.round(totalAll).toLocaleString();
+  const changeEl=document.getElementById('dash-analytics-change');
+  if(growth>=0){changeEl.style.background='rgba(16,185,129,0.12)';changeEl.style.color='#10b981';changeEl.textContent='+$'+Math.round(thisRev-lastRev).toLocaleString();}
+  else{changeEl.style.background='rgba(239,68,68,0.12)';changeEl.style.color='#ef4444';changeEl.textContent='-$'+Math.round(Math.abs(thisRev-lastRev)).toLocaleString();}
 
-  // ══ INGRESOS COMBINADOS POR MES ══
-  if (window._dashChartIng) window._dashChartIng.destroy();
-  window._dashChartIng = new Chart(document.getElementById('chartIngMes'), {
-    type:'bar',
-    data:{ labels:allMonths.map(monthLabel), datasets:[
-      { label:'MX VIP', data:ingMXvals, backgroundColor:'#1D9E75', borderRadius:4, borderSkipped:false, stack:'a' },
-      { label:'DarkHub', data:ingDHvals, backgroundColor:'#378ADD', borderRadius:4, borderSkipped:false, stack:'a' },
-      { label:'Gabito VIP', data:ingGabitoVals, backgroundColor:'#a78bfa', borderRadius:4, borderSkipped:false, stack:'a' }
-    ]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{labels:{font:{size:11},boxWidth:10}}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: $${c.parsed.y.toLocaleString()}`}} }, scales:{ x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}}, y:{stacked:true, grid:{color:'rgba(255,255,255,.06)'},ticks:{font:{size:10},callback:v=>'$'+v.toLocaleString()}} } }
+  if(window._chartArea) window._chartArea.destroy();
+  window._chartArea=new Chart(document.getElementById('chartAreaMes'),{
+    type:'line',
+    data:{labels:allMonths.map(monthLabel),datasets:[{
+      data:areaData,
+      fill:true,
+      backgroundColor:function(ctx){const g=ctx.chart.ctx.createLinearGradient(0,0,0,220);g.addColorStop(0,'rgba(99,102,241,0.25)');g.addColorStop(1,'rgba(99,102,241,0)');return g;},
+      borderColor:'#6366f1',borderWidth:2.5,
+      pointBackgroundColor:'#6366f1',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:4,pointHoverRadius:7,
+      tension:0.4
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:10},callback:v=>'$'+v.toLocaleString()}}}}
   });
-  document.getElementById('dash-ing-totals').innerHTML = `<span>MX VIP: <strong>$${Math.round(totalMX).toLocaleString()}</strong></span><span>DarkHub: <strong>$${Math.round(totalDH).toLocaleString()}</strong></span><span>Gabito VIP: <strong>$${Math.round(totalGabito).toLocaleString()}</strong></span><span>Total: <strong>$${Math.round(totalMX+totalDH+totalGabito).toLocaleString()}</strong></span>`;
+
+  // ══ SALES PERFORMANCE DONUT ══
+  const perfPct=growth>100?100:growth<0?0:Math.round(growth);
+  if(window._chartPerf) window._chartPerf.destroy();
+  window._chartPerf=new Chart(document.getElementById('chartPerfDonut'),{
+    type:'doughnut',
+    data:{datasets:[{data:[perfPct,100-perfPct],backgroundColor:['#6366f1','rgba(255,255,255,0.06)'],borderWidth:0,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:true,cutout:'78%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{animateRotate:true,duration:1200}}
+  });
+  document.getElementById('dash-perf-pct').querySelector('span').textContent=perfPct+'%';
+
+  // ══ HEATMAP ══
+  const heatData={};
+  [...fMX,...fDH,...fGB].forEach(r=>{const d=parseEnt(r);if(d){const k=d.toISOString().slice(0,10);heatData[k]=(heatData[k]||0)+1;}});
+  const heatTotal=Object.values(heatData).reduce((a,b)=>a+b,0);
+  document.getElementById('dash-heatmap-total').textContent=heatTotal+' sales registered';
+  const maxH=Math.max(...Object.values(heatData),1);
+  // Last 90 days
+  const cells=[];
+  for(let i=89;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const k=d.toISOString().slice(0,10);
+    const v=heatData[k]||0;
+    const intensity=v/maxH;
+    const color=v===0?'rgba(255,255,255,0.03)':`rgba(99,102,241,${0.15+intensity*0.75})`;
+    cells.push(`<div title="${k}: ${v} sales" style="width:10px;height:10px;border-radius:2px;background:${color}"></div>`);
+  }
+  document.getElementById('dash-heatmap').innerHTML=cells.join('');
+
+  // ══ TOP GROUPS TABLE ══
+  const groups=[
+    {name:'MX VIP',members:fMX.length,revenue:totalMX,color:'#3b82f6',icon:'👑'},
+    {name:'DarkHub',members:fDH.length,revenue:totalDH,color:'#8b5cf6',icon:'🛡️'},
+    {name:'Gabito VIP',members:fGB.length,revenue:totalGB,color:'#6366f1',icon:'⭐'}
+  ].sort((a,b)=>b.revenue-a.revenue);
+  document.getElementById('dash-topgroups').innerHTML=groups.map(g=>{
+    const share=totalAll>0?Math.round(g.revenue/totalAll*100):0;
+    return `<tr>
+      <td><span style="margin-right:6px">${g.icon}</span><strong>${g.name}</strong></td>
+      <td>${g.members}</td>
+      <td style="text-align:right;font-weight:600;color:${g.color}">$${Math.round(g.revenue).toLocaleString()}</td>
+      <td style="text-align:right"><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end"><div style="width:50px;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden"><div style="width:${share}%;height:100%;background:${g.color};border-radius:3px"></div></div><span style="font-size:11px;color:var(--text-2)">${share}%</span></div></td>
+    </tr>`;
+  }).join('');
 
   // ══ SUBS POR MES ══
-  if (window._dashChartSubs) window._dashChartSubs.destroy();
-  window._dashChartSubs = new Chart(document.getElementById('chartSubsMes'), {
+  const subsMX={},subsDH={},subsGabito={};
+  fMX.forEach(r=>{const k=monthKey(parseEnt(r));if(k)subsMX[k]=(subsMX[k]||0)+1;});
+  fDH.forEach(r=>{const k=monthKey(parseEnt(r));if(k)subsDH[k]=(subsDH[k]||0)+1;});
+  fGB.forEach(r=>{const k=monthKey(parseEnt(r));if(k)subsGabito[k]=(subsGabito[k]||0)+1;});
+  const allSubM=[...new Set([...Object.keys(subsMX),...Object.keys(subsDH),...Object.keys(subsGabito)])].sort().slice(-8);
+  const vMX=allSubM.map(k=>subsMX[k]||0),vDH=allSubM.map(k=>subsDH[k]||0),vGB=allSubM.map(k=>subsGabito[k]||0);
+  const vTotal=allSubM.map((_,i)=>vMX[i]+vDH[i]+vGB[i]);
+
+  if(window._chartSubs)window._chartSubs.destroy();
+  window._chartSubs=new Chart(document.getElementById('chartSubsMes'),{
     type:'bar',
-    data:{ labels:allSubMonths.map(monthLabel), datasets:[
-      { label:'MX VIP', data:valsMX, backgroundColor:'#1D9E75', borderRadius:3, borderSkipped:false },
-      { label:'DarkHub', data:valsDH, backgroundColor:'#378ADD', borderRadius:3, borderSkipped:false },
-      { label:'Gabito VIP', data:valsGabito, backgroundColor:'#a78bfa', borderRadius:3, borderSkipped:false },
-      { label:'Total', data:valsTotal, backgroundColor:'rgba(167,139,250,.15)', borderRadius:3, borderSkipped:false }
+    data:{labels:allSubM.map(monthLabel),datasets:[
+      {label:'MX VIP',data:vMX,backgroundColor:'#3b82f6',borderRadius:3,borderSkipped:false},
+      {label:'DarkHub',data:vDH,backgroundColor:'#8b5cf6',borderRadius:3,borderSkipped:false},
+      {label:'Gabito',data:vGB,backgroundColor:'#6366f1',borderRadius:3,borderSkipped:false}
     ]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{labels:{font:{size:10},boxWidth:8,padding:10}}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y} subs`}} }, scales:{ x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}}, y:{grid:{color:'rgba(255,255,255,.06)'},ticks:{font:{size:10},stepSize:1}} } }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},boxWidth:8}},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:10},stepSize:1}}}}
   });
-  document.getElementById('dash-subs-totals').innerHTML = `<span>MX VIP: <strong>${mesMX}</strong></span><span>DarkHub: <strong>${mesDH}</strong></span><span>Gabito VIP: <strong>${mesGabito}</strong></span><span>Total: <strong>${mesMX+mesDH+mesGabito}</strong></span>`;
+  const mMX=vMX[vMX.length-1]||0,mDH=vDH[vDH.length-1]||0,mGB=vGB[vGB.length-1]||0;
+  document.getElementById('dash-subs-totals').innerHTML=`<span>MX: <strong>${mMX}</strong></span><span>DH: <strong>${mDH}</strong></span><span>Gabito: <strong>${mGB}</strong></span><span>Total: <strong>${mMX+mDH+mGB}</strong></span>`;
 
-  // ══ DÍAS DE LA SEMANA ══
-  if (window._dashChartDow) window._dashChartDow.destroy();
-  window._dashChartDow = new Chart(document.getElementById('chartDow'), {
+  // ══ DAYS OF WEEK ══
+  const dowLabels=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const dowCount=[0,0,0,0,0,0,0];
+  [...fMX,...fDH,...fGB].forEach(r=>{const d=parseEnt(r);if(d)dowCount[d.getDay()]++;});
+  if(window._chartDow)window._chartDow.destroy();
+  window._chartDow=new Chart(document.getElementById('chartDow'),{
     type:'bar',
-    data:{ labels:dowLabels, datasets:[{ data:dowCount, backgroundColor:dowCount.map(v=>v===Math.max(...dowCount)?'#1D9E75':'rgba(29,158,117,.3)'), borderRadius:4, borderSkipped:false }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.parsed.y} ventas`}} }, scales:{ x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}}, y:{grid:{color:'rgba(255,255,255,.06)'},ticks:{font:{size:10},stepSize:1}} } }
+    data:{labels:dowLabels,datasets:[{data:dowCount,backgroundColor:dowCount.map(v=>v===Math.max(...dowCount)?'#6366f1':'rgba(99,102,241,.25)'),borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:10},stepSize:1}}}}
   });
 
-  // ══ PLANES MX VIP (donut) ══
+  // ══ PLANS DONUT ══
+  const planCount={};fMX.forEach(r=>{const p=r.plan||'Otro';planCount[p]=(planCount[p]||0)+1;});
   const planNames=['2 Semanas','1 Mes','2 Meses','Permanente'];
-  const planColors=['#1D9E75','#378ADD','#7F77DD','#0F6E56'];
-  const planVals=planNames.map(p=>planCount[p]||0);
-  if (window._dashChartPlanes) window._dashChartPlanes.destroy();
-  window._dashChartPlanes = new Chart(document.getElementById('chartPlanes'), {
+  const planColors=['#3b82f6','#6366f1','#8b5cf6','#a78bfa'];
+  if(window._chartPlanes)window._chartPlanes.destroy();
+  window._chartPlanes=new Chart(document.getElementById('chartPlanes'),{
     type:'doughnut',
-    data:{ labels:planNames, datasets:[{ data:planVals, backgroundColor:planColors, borderWidth:0, hoverOffset:4 }] },
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:10}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} subs`}} } }
+    data:{labels:planNames,datasets:[{data:planNames.map(p=>planCount[p]||0),backgroundColor:planColors,borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:10}}}}
   });
 
-  // ══ DARKHUB POR MONTO ══
-  if (window._dashChartDH) window._dashChartDH.destroy();
-  window._dashChartDH = new Chart(document.getElementById('chartDH'), {
+  // ══ DH AMOUNTS ══
+  const dhAmounts={};fDH.forEach(r=>{const k='$'+r.monto;dhAmounts[k]=(dhAmounts[k]||0)+1;});
+  const dhLabels=Object.keys(dhAmounts).sort((a,b)=>parseFloat(a.slice(1))-parseFloat(b.slice(1)));
+  if(window._chartDH)window._chartDH.destroy();
+  window._chartDH=new Chart(document.getElementById('chartDH'),{
     type:'doughnut',
-    data:{ labels:dhLabels, datasets:[{ data:dhLabels.map(k=>dhAmounts[k]), backgroundColor:['#7F77DD','#378ADD','#1D9E75','#0F6E56'], borderWidth:0, hoverOffset:4 }] },
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:10}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} miembros`}} } }
+    data:{labels:dhLabels,datasets:[{data:dhLabels.map(k=>dhAmounts[k]),backgroundColor:['#6366f1','#3b82f6','#8b5cf6','#a78bfa'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:10}}}}
   });
-  document.getElementById('dash-dh-totals').innerHTML = `<span>Total: <strong>$${Math.round(totalDH).toLocaleString()}</strong></span><span>Miembros: <strong>${dhData.length}</strong></span>`;
+  document.getElementById('dash-dh-totals').innerHTML=`<span>Total: <strong>$${Math.round(totalDH).toLocaleString()}</strong></span><span>Members: <strong>${fDH.length}</strong></span>`;
 
-  // ══ PRÓXIMOS A VENCER ══
-  const prox=[...mxData,...gabitoData].filter(r=>{const s=getStatus(r);return s==='PRÓXIMO'||s==='VENCE HOY';}).map(r=>({...r,_dias:getDias(r),_status:getStatus(r)})).sort((a,b)=>(a._dias||0)-(b._dias||0));
+  // ══ PRÓXIMOS ══
+  const prox=mxData.filter(r=>{const s=getStatus(r);return s==='PRÓXIMO'||s==='VENCE HOY';}).map(r=>({...r,_dias:getDias(r),_status:getStatus(r)})).sort((a,b)=>(a._dias||0)-(b._dias||0));
   const dtbody=document.getElementById('dash-proximos');
-  if(prox.length===0){dtbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#bbb;padding:16px">Nadie vence esta semana</td></tr>';return;}
+  if(prox.length===0){dtbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#bbb;padding:16px">No one expires this week</td></tr>';return;}
   dtbody.innerHTML=prox.map(r=>{
-    const txt=r._dias===0?'Hoy':r._dias+'d';
+    const txt=r._dias===0?'Today':r._dias+'d';
     const cls=r._dias===0?'pill pill-0':r._dias<=3?'pill pill-low':'pill pill-ok';
     return `<tr><td><strong>${r.nombre}</strong></td><td class="muted">${r.fechas}</td><td>${statusBadge(r._status)}</td><td style="text-align:right"><span class="${cls}">${txt}</span></td></tr>`;
   }).join('');
@@ -1836,5 +2203,7 @@ calcFechasMX();
   });
 })();
 </script>
+</div><!-- /app-main -->
+</div><!-- /app-layout -->
 </body>
 </html>
