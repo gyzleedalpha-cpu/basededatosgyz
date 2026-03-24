@@ -1436,7 +1436,8 @@ function renderGabitoTable(search) {
           <td style="text-align:right"><button class="btn-del" onclick="eliminarGabito(${start+i})">✕</button></td>
         </tr>`;
       }).join('');
-  renderPager('gabito-pager', filtered.length, gabitoPage, p=>{ gabitoPage=p; renderGabitoTable(); });
+  const totalGabitoPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  renderPager('gabito-pager', gabitoPage, totalGabitoPages, p=>{ gabitoPage=p; renderGabitoTable(); });
 }
 
 function eliminarGabito(i) {
@@ -1557,9 +1558,6 @@ function updateHeader() {
   const sbDH = document.getElementById('sb-dh-badge'); if(sbDH) sbDH.textContent = dhData.length;
   const sbGB = document.getElementById('sb-gabito-badge'); if(sbGB) sbGB.textContent = actGabito;
   // Sidebar badges
-  const sbMX = document.getElementById('sb-mx-badge'); if(sbMX) sbMX.textContent = actMX;
-  const sbDH = document.getElementById('sb-dh-badge'); if(sbDH) sbDH.textContent = dhData.length;
-  const sbGB = document.getElementById('sb-gabito-badge'); if(sbGB) sbGB.textContent = actGabito;
   document.getElementById('hDate').textContent = new Date().toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'});
 }
 
