@@ -816,6 +816,11 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
       Caro
       <span class="sb-badge" id="sb-caro-badge">—</span>
     </button>
+    <button class="sb-item" onclick="switchTab('tonyfans',this)" data-tab="tonyfans">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      TonyFans
+      <span class="sb-badge" id="sb-tonyfans-badge">—</span>
+    </button>
     <div class="sb-section-label" style="margin-top:16px">Herramientas</div>
     <button class="sb-item" onclick="switchTab('analisis',this)" data-tab="analisis">
       <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -850,6 +855,7 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
         <span id="hDH" class="ts-item">DarkHub: —</span>
         <span id="hGabito" class="ts-item">Gabito VIP: —</span>
         <span id="hCaro" class="ts-item">Caro: —</span>
+        <span id="hTonyfans" class="ts-item">TonyFans: —</span>
       </div>
       <button id="currency-toggle" onclick="toggleCurrency()" class="export-btn" style="display:flex;align-items:center;gap:5px;min-width:70px;justify-content:center">
         <span style="font-size:13px">💱</span> <span id="currency-label">MXN</span>
@@ -1028,6 +1034,45 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
       <tbody id="caro-tbody"></tbody>
     </table></div>
     <div id="caro-pager" class="page-bar"></div>
+  </div>
+</main>
+</div>
+
+<!-- ===== TONYFANS ===== -->
+<div id="tab-tonyfans" class="tab-content">
+<main>
+  <div class="slabel">Nuevo registro — TonyFans</div>
+  <div class="panel">
+    <div class="toast" id="toast-tonyfans"></div>
+    <div class="field"><label>Nombre / @ Telegram</label><input type="text" id="tonyfans-nombre" placeholder="@usuario o nombre" autocomplete="off"></div>
+    <div class="row2">
+      <div class="field"><label>ID Telegram</label><input type="text" id="tonyfans-id" placeholder="123456789"></div>
+      <div class="field"><label>Método de pago</label>
+        <select id="tonyfans-metodo">
+          <option>Transferencia MX</option><option>PayPal</option><option>Efectivo</option><option>Stripe</option><option>Crypto</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Fecha de ingreso</label><input type="date" id="tonyfans-entrada"></div>
+      <div class="field"><label>Monto</label>
+        <div style="padding:10px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:14px;color:#ef4444;font-weight:700">$200 MXN — Permanente</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="registrarTonyfans()">Guardar en TonyFans</button>
+  </div>
+
+  <div class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h3 style="margin:0">Miembros TonyFans</h3>
+      <span style="font-size:12px;color:#aaa" id="tonyfans-count-label"></span>
+    </div>
+    <input class="search-input" type="text" id="tonyfans-search" placeholder="Buscar por nombre o ID..." oninput="tonyfansPage=1;renderTonyfansTable(this.value)">
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Nombre</th><th>ID</th><th>Monto</th><th>Método</th><th></th></tr></thead>
+      <tbody id="tonyfans-tbody"></tbody>
+    </table></div>
+    <div id="tonyfans-pager" class="page-bar"></div>
   </div>
 </main>
 </div>
@@ -1251,6 +1296,16 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
     <div id="import-caro-status" style="font-size:12px;color:#1D9E75;margin-top:8px"></div>
   </div>
 
+  <div class="panel">
+    <h3>Cargar Excel TonyFans</h3>
+    <div class="import-zone" onclick="document.getElementById('file-tonyfans').click()">
+      <div style="font-size:24px">📂</div>
+      <p>Haz clic para seleccionar tu archivo de TonyFans (.xlsx)</p>
+    </div>
+    <input type="file" id="file-tonyfans" accept=".xlsx,.xls" style="display:none" onchange="importarTonyfans(this)">
+    <div id="import-tonyfans-status" style="font-size:12px;color:#1D9E75;margin-top:8px"></div>
+  </div>
+
   <div class="slabel" style="margin-top:8px">Exportar</div>
   <div class="panel">
     <h3>Exportar a Excel</h3>
@@ -1259,6 +1314,7 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
       <button class="btn-sm" onclick="exportar('DarkHub')">Exportar DarkHub</button>
       <button class="btn-sm" onclick="exportar('Gabito VIP')">Exportar Gabito VIP</button>
       <button class="btn-sm" onclick="exportar('Caro')">Exportar Caro</button>
+      <button class="btn-sm" onclick="exportar('TonyFans')">Exportar TonyFans</button>
       <button class="btn-sm" onclick="exportar('todos')">Exportar todo</button>
     </div>
     <div class="note">El Excel exportado tiene el mismo formato que tu base original.</div>
@@ -1353,6 +1409,17 @@ function initFirebase() {
       }
       setSyncStatus('synced');
     });
+    db.ref('vip_tonyfans').on('value', snap => {
+      const val = snap.val();
+      if (val && Array.isArray(val)) {
+        tonyfansData = val;
+        if (_lsOk) try { localStorage.setItem('vip_tonyfans', JSON.stringify(tonyfansData)); } catch(e){}
+        renderTonyfansTable(); updateHeader();
+      } else if (val === null) {
+        db.ref('vip_tonyfans').set(tonyfansData);
+      }
+      setSyncStatus('synced');
+    });
   } catch(e) { console.warn('Firebase:', e); db = null; setSyncStatus('error'); }
 }
 // ─── DATA ───────────────────────────────────────────────────────────────────
@@ -1362,10 +1429,12 @@ const HIST_DH = [{"grupo":"DarkHub","nombre":".","id":"7074836753","plan":"Perma
 
 const HIST_CARO = [{"grupo":"Caro","nombre":".....","id":"7782412523","plan":"Permanente","fechas":"Permanente","entrada":"02/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Witti","id":"1895890496","plan":"Permanente","fechas":"Permanente","entrada":"23/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"a","id":"1620449728","plan":"Permanente","fechas":"Permanente","entrada":"30/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Lopez","id":"1087881347","plan":"Permanente","fechas":"Permanente","entrada":"15/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"L","id":"6052248377","plan":"Permanente","fechas":"Permanente","entrada":"18/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@eddccc0102","id":"1773351172","plan":"Permanente","fechas":"Permanente","entrada":"26/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Patricio","id":"5242476942","plan":"Permanente","fechas":"Permanente","entrada":"21/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@ManuB4R","id":"1445462677","plan":"Permanente","fechas":"Permanente","entrada":"06/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@ruisu_seretto","id":"765985660","plan":"Permanente","fechas":"Permanente","entrada":"17/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"josue","id":"646747331","plan":"Permanente","fechas":"Permanente","entrada":"17/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@sisislola","id":"1575135318","plan":"Permanente","fechas":"Permanente","entrada":"20/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Jsjd Djjd","id":"7816065755","plan":"Permanente","fechas":"Permanente","entrada":"22/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Verazaluce93","id":"1219642520","plan":"Permanente","fechas":"Permanente","entrada":"25/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@J_s4_4","id":"6412641636","plan":"Permanente","fechas":"Permanente","entrada":"27/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Durán","id":"5249611827","plan":"Permanente","fechas":"Permanente","entrada":"28/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Mapa_chito","id":"5545466804","plan":"Permanente","fechas":"Permanente","entrada":"29/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@desconocido_234","id":"1022800977","plan":"Permanente","fechas":"Permanente","entrada":"03/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@crz128","id":"1276720618","plan":"Permanente","fechas":"Permanente","entrada":"04/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@MrOkruss","id":"927830708","plan":"Permanente","fechas":"Permanente","entrada":"04/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Juan Cos","id":"6132079568","plan":"Permanente","fechas":"Permanente","entrada":"11/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Looll","id":"8144022125","plan":"Permanente","fechas":"Permanente","entrada":"16/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@JeffWarren16","id":"6564384366","plan":"Permanente","fechas":"Permanente","entrada":"27/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Victor","id":"7159213764","plan":"Permanente","fechas":"Permanente","entrada":"01/01/26","salida":"Permanente","monto":200,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Marino Vazques","id":"6825294953","plan":"Permanente","fechas":"Permanente","entrada":"01/01/26","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"k","id":"6101703576","plan":"Permanente","fechas":"Permanente","entrada":"12/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Uno.","id":"1286267009","plan":"Permanente","fechas":"Permanente","entrada":"17/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"AR","id":"5084200898","plan":"Permanente","fechas":"Permanente","entrada":"18/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Peraljuan","id":"1543367622","plan":"Permanente","fechas":"Permanente","entrada":"22/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"d\\{","id":"5542678397","plan":"Permanente","fechas":"Permanente","entrada":"22/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Larr","id":"6513329564","plan":"Permanente","fechas":"Permanente","entrada":"24/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"JC","id":"427059839","plan":"Permanente","fechas":"Permanente","entrada":"29/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@OAOR25","id":"6865802572","plan":"Permanente","fechas":"Permanente","entrada":"30/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Pepe Pepe Pepe","id":"8202883317","plan":"Permanente","fechas":"Permanente","entrada":"30/01/26","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"tomasx","id":"1980738013","plan":"Permanente","fechas":"Permanente","entrada":"31/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Vale","id":"6567996135","plan":"Permanente","fechas":"Permanente","entrada":"01/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Leslie","id":"8347358978","plan":"Permanente","fechas":"Permanente","entrada":"02/02/26","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Secret","id":"1938936310","plan":"Permanente","fechas":"Permanente","entrada":"03/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Dtvh","id":"7880989230","plan":"Permanente","fechas":"Permanente","entrada":"03/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Tony_klk","id":"5007578462","plan":"Permanente","fechas":"Permanente","entrada":"20/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Najeliad","id":"6836662121","plan":"Permanente","fechas":"Permanente","entrada":"19/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Luis G","id":"7035212352","plan":"Permanente","fechas":"Permanente","entrada":"20/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"El Cholo","id":"7738962045","plan":"Permanente","fechas":"Permanente","entrada":"25/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@crhistianmachado","id":"8202193992","plan":"Permanente","fechas":"Permanente","entrada":"10/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@ffgvjvvd","id":"7593650459","plan":"Permanente","fechas":"Permanente","entrada":"12/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Franz Krommer","id":"8572379555","plan":"Permanente","fechas":"Permanente","entrada":"14/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Saul0105","id":"1219653686","plan":"Permanente","fechas":"Permanente","entrada":"15/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Mx","id":"6686824936","plan":"Permanente","fechas":"Permanente","entrada":"15/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Esobrad 23","id":"6947600285","plan":"Permanente","fechas":"Permanente","entrada":"15/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@nftlovertho","id":"925668993","plan":"Permanente","fechas":"Permanente","entrada":"16/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"U Y","id":"1577248591","plan":"Permanente","fechas":"Permanente","entrada":"16/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"anibal garcia","id":"1626005516","plan":"Permanente","fechas":"Permanente","entrada":"17/03/26","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"76820","id":"6385569645","plan":"Permanente","fechas":"Permanente","entrada":"17/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Daniel Cabrera","id":"1294431538","plan":"Permanente","fechas":"Permanente","entrada":"19/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Jose Torres","id":"7035827738","plan":"Permanente","fechas":"Permanente","entrada":"20/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Osndt0827","id":"1441632507","plan":"Permanente","fechas":"Permanente","entrada":"21/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Cris RG","id":"7191313901","plan":"Permanente","fechas":"Permanente","entrada":"21/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Black Jack","id":"7424518702","plan":"Permanente","fechas":"Permanente","entrada":"22/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Ashley Sanchez","id":"8480409796","plan":"Permanente","fechas":"Permanente","entrada":"22/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Jamil Weys","id":"6817138278","plan":"Permanente","fechas":"Permanente","entrada":"25/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Petikuye","id":"5339396491","plan":"Permanente","fechas":"Permanente","entrada":"27/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true}];
 
+const HIST_TONYFANS = [];
 let mxData = [];
 let dhData = [];
 let gabitoData = [];
 let caroData = [];
+let tonyfansData = [];
 
 let _lsOk = false;
 function testLS() {
@@ -1379,13 +1448,16 @@ function loadData() {
     const savedDH = localStorage.getItem('vip_dh');
     const savedGabito = localStorage.getItem('vip_gabito');
     const savedCaro = localStorage.getItem('vip_caro');
+    const savedTonyfans = localStorage.getItem('vip_tonyfans');
     mxData = savedMX ? JSON.parse(savedMX) : [...HIST_MX];
     dhData = savedDH ? JSON.parse(savedDH) : [...HIST_DH];
     caroData = savedCaro ? JSON.parse(savedCaro) : [...HIST_CARO];
+    tonyfansData = savedTonyfans ? JSON.parse(savedTonyfans) : [...HIST_TONYFANS];
   } else {
     mxData = [...HIST_MX];
     dhData = [...HIST_DH];
     caroData = [...HIST_CARO];
+    tonyfansData = [...HIST_TONYFANS];
     setTimeout(showLSWarning, 800);
   }
 }
@@ -1397,11 +1469,12 @@ function saveData() {
       localStorage.setItem('vip_dh', JSON.stringify(dhData));
       localStorage.setItem('vip_gabito', JSON.stringify(gabitoData));
       localStorage.setItem('vip_caro', JSON.stringify(caroData));
+      localStorage.setItem('vip_tonyfans', JSON.stringify(tonyfansData));
     } catch(e) { _lsOk = false; showLSWarning(); }
   } else { showLSWarning(); }
   if (db) {
     setSyncStatus('syncing');
-    Promise.all([db.ref('vip_mx').set(mxData), db.ref('vip_dh').set(dhData), db.ref('vip_gabito').set(gabitoData), db.ref('vip_caro').set(caroData)])
+    Promise.all([db.ref('vip_mx').set(mxData), db.ref('vip_dh').set(dhData), db.ref('vip_gabito').set(gabitoData), db.ref('vip_caro').set(caroData), db.ref('vip_tonyfans').set(tonyfansData)])
       .then(() => setSyncStatus('synced'))
       .catch(() => setSyncStatus('error'));
   }
@@ -1426,10 +1499,12 @@ function globalSearch(q) {
   const dhMatch = dhData.some(r=>(r.nombre||'').toLowerCase().includes(q)||(r.id||'').includes(q));
   const gbMatch = gabitoData.some(r=>(r.nombre||'').toLowerCase().includes(q)||(r.id||'').includes(q));
   const caMatch = caroData.some(r=>(r.nombre||'').toLowerCase().includes(q)||(r.id||'').includes(q));
+  const tfMatch = tonyfansData.some(r=>(r.nombre||'').toLowerCase().includes(q)||(r.id||'').includes(q));
   if(mxMatch){ switchTab('mxvip',null); document.getElementById('mx-search').value=q; mxPage=1; renderMXTable(q); }
   else if(dhMatch){ switchTab('darkhub',null); document.getElementById('dh-search').value=q; dhPage=1; renderDHTable(q); }
   else if(gbMatch){ switchTab('gabitovip',null); document.getElementById('gabito-search').value=q; gabitoPage=1; renderGabitoTable(q); }
   else if(caMatch){ switchTab('caro',null); document.getElementById('caro-search').value=q; caroPage=1; renderCaroTable(q); }
+  else if(tfMatch){ switchTab('tonyfans',null); document.getElementById('tonyfans-search').value=q; tonyfansPage=1; renderTonyfansTable(q); }
 }
 
 // ── Sidebar mobile toggle ──
@@ -1460,6 +1535,7 @@ function switchTab(name, btn) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'gabitovip') { gabitoPage=1; renderGabitoTable(); }
   if (name === 'caro') { caroPage=1; renderCaroTable(); }
+  if (name === 'tonyfans') { tonyfansPage=1; renderTonyfansTable(); }
   if (name === 'analisis') renderAnalisis();
   if (name === 'importar') renderMemStats();
 }
@@ -1626,6 +1702,24 @@ function registrarCaro() {
   renderCaroTable();
 }
 
+function registrarTonyfans() {
+  const nombre = document.getElementById('tonyfans-nombre').value.trim();
+  const id = document.getElementById('tonyfans-id').value.trim();
+  const metodo = document.getElementById('tonyfans-metodo').value;
+  if (!nombre) { alert('Falta el nombre'); return; }
+  const tfEntEl = document.getElementById('tonyfans-entrada');
+  const tfEntVal = tfEntEl.value ? fmtDate(new Date(tfEntEl.value + 'T12:00:00')) : fmtDate(new Date());
+  const rec = { grupo:'TonyFans', nombre, id, plan:'Permanente', fechas:'Permanente', entrada: tfEntVal, salida:'Permanente', monto: 200, metodo, status:'PERMANENTE', historico: false, ts: new Date().toISOString() };
+  tonyfansData.push(rec);
+  saveData();
+  toast('toast-tonyfans', 'Guardado en TonyFans');
+  document.getElementById('tonyfans-nombre').value = '';
+  document.getElementById('tonyfans-id').value = '';
+  const _td = new Date(); tfEntEl.value = `${_td.getFullYear()}-${String(_td.getMonth()+1).padStart(2,'0')}-${String(_td.getDate()).padStart(2,'0')}`;
+  updateHeader();
+  renderTonyfansTable();
+}
+
 function renderGabitoTable(search) {
   const q = (search || document.getElementById('gabito-search').value || '').toLowerCase();
   const filtered = gabitoData.filter(r => !r.historico && (!q || r.nombre.toLowerCase().includes(q) || (r.id||'').includes(q)));
@@ -1684,6 +1778,34 @@ function eliminarCaro(i) {
   caroData.splice(i,1); saveData(); renderCaroTable(); updateHeader();
 }
 
+function renderTonyfansTable(search) {
+  if (search === undefined) search = document.getElementById('tonyfans-search')?.value || '';
+  const tbody = document.getElementById('tonyfans-tbody');
+  let data = tonyfansData;
+  if (search) { const q = search.toLowerCase(); data = data.filter(r => (r.nombre||'').toLowerCase().includes(q) || (r.id||'').includes(q)); }
+  const total = data.length;
+  document.getElementById('tonyfans-count-label').textContent = `${total} miembros`;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (tonyfansPage > totalPages) tonyfansPage = totalPages;
+  const pageData = data.slice((tonyfansPage-1)*PAGE_SIZE, tonyfansPage*PAGE_SIZE);
+  if (pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px">Sin resultados</td></tr>'; }
+  else {
+    tbody.innerHTML = pageData.map(r => `<tr>
+      <td><strong>${r.nombre}</strong></td>
+      <td class="muted">${r.id}</td>
+      <td>$${r.monto.toLocaleString()}</td>
+      <td class="muted">${r.metodo || '—'}</td>
+      <td>${!r.historico ? `<button class="del-btn" onclick="eliminarTonyfans(${tonyfansData.indexOf(r)})">✕</button>` : ''}</td>
+    </tr>`).join('');
+  }
+  renderPager('tonyfans-pager', tonyfansPage, totalPages, 'setTonyfansPage');
+}
+
+function eliminarTonyfans(i) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  tonyfansData.splice(i,1); saveData(); renderTonyfansTable(); updateHeader();
+}
+
 function toast(id, msg) {
   const el = document.getElementById(id);
   el.textContent = msg; el.classList.add('show');
@@ -1691,11 +1813,12 @@ function toast(id, msg) {
 }
 
 // ─── PAGINATION ──────────────────────────────────────────────────────────────
-let mxPage = 1, dhPage = 1, gabitoPage = 1, caroPage = 1;
+let mxPage = 1, dhPage = 1, gabitoPage = 1, caroPage = 1, tonyfansPage = 1;
 const PAGE_SIZE = 25;
 function setMxPage(p) { mxPage = p; renderMXTable(); }
 function setDhPage(p) { dhPage = p; renderDHTable(); }
 function setCaroPage(p) { caroPage = p; renderCaroTable(); }
+function setTonyfansPage(p) { tonyfansPage = p; renderTonyfansTable(); }
 function renderPager(id, cur, total, setter) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -1794,11 +1917,13 @@ function updateHeader() {
   document.getElementById('hDH').textContent = `DarkHub: ${dhData.length} miembros`;
   document.getElementById('hGabito').textContent = `Gabito VIP: ${actGabito} activos`;
   document.getElementById('hCaro').textContent = `Caro: ${caroData.length} miembros`;
+  document.getElementById('hTonyfans').textContent = `TonyFans: ${tonyfansData.length} miembros`;
   // Sidebar badges
   const sbMX = document.getElementById('sb-mx-badge'); if(sbMX) sbMX.textContent = actMX;
   const sbDH = document.getElementById('sb-dh-badge'); if(sbDH) sbDH.textContent = dhData.length;
   const sbGB = document.getElementById('sb-gabito-badge'); if(sbGB) sbGB.textContent = actGabito;
   const sbCaro = document.getElementById('sb-caro-badge'); if(sbCaro) sbCaro.textContent = caroData.length;
+  const sbTF = document.getElementById('sb-tonyfans-badge'); if(sbTF) sbTF.textContent = tonyfansData.length;
   // Sidebar badges
   document.getElementById('hDate').textContent = new Date().toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'});
 }
@@ -1895,7 +2020,7 @@ function renderDashboard() {
     if (period==='year') return d.getFullYear()===now.getFullYear();
     return true;
   };
-  const fMX = mxData.filter(filterDate), fDH = dhData.filter(filterDate), fGB = gabitoData.filter(filterDate), fCA = caroData.filter(filterDate);
+  const fMX = mxData.filter(filterDate), fDH = dhData.filter(filterDate), fGB = gabitoData.filter(filterDate), fCA = caroData.filter(filterDate), fTF = tonyfansData.filter(filterDate);
 
   // Status
   const statusCount = {};
@@ -1907,21 +2032,23 @@ function renderDashboard() {
   const totalDH = fDH.reduce((a,r)=>a+r.monto,0);
   const totalGB = fGB.reduce((a,r)=>a+r.monto,0);
   const totalCA = fCA.reduce((a,r)=>a+r.monto,0);
-  const totalAll = totalMX+totalDH+totalGB+totalCA;
+  const totalTF = fTF.reduce((a,r)=>a+r.monto,0);
+  const totalAll = totalMX+totalDH+totalGB+totalCA+totalTF;
 
   // Monthly
-  const monthMX={}, monthDH={}, monthGB={}, monthCA={};
+  const monthMX={}, monthDH={}, monthGB={}, monthCA={}, monthTF={};
   fMX.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) monthMX[k]=(monthMX[k]||0)+r.monto; });
   fDH.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) monthDH[k]=(monthDH[k]||0)+r.monto; });
   fGB.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) monthGB[k]=(monthGB[k]||0)+r.monto; });
   fCA.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) monthCA[k]=(monthCA[k]||0)+r.monto; });
-  const allMonths=[...new Set([...Object.keys(monthMX),...Object.keys(monthDH),...Object.keys(monthGB),...Object.keys(monthCA)])].sort().slice(-8);
+  fTF.forEach(r=>{ const k=monthKey(parseEnt(r)); if(k) monthTF[k]=(monthTF[k]||0)+r.monto; });
+  const allMonths=[...new Set([...Object.keys(monthMX),...Object.keys(monthDH),...Object.keys(monthGB),...Object.keys(monthCA),...Object.keys(monthTF)])].sort().slice(-8);
 
   const thisK=monthKey(now);
   const lastD=new Date();lastD.setMonth(lastD.getMonth()-1);
   const lastK=monthKey(lastD);
-  const thisRev=(monthMX[thisK]||0)+(monthDH[thisK]||0)+(monthGB[thisK]||0)+(monthCA[thisK]||0);
-  const lastRev=(monthMX[lastK]||0)+(monthDH[lastK]||0)+(monthGB[lastK]||0)+(monthCA[lastK]||0);
+  const thisRev=(monthMX[thisK]||0)+(monthDH[thisK]||0)+(monthGB[thisK]||0)+(monthCA[thisK]||0)+(monthTF[thisK]||0);
+  const lastRev=(monthMX[lastK]||0)+(monthDH[lastK]||0)+(monthGB[lastK]||0)+(monthCA[lastK]||0)+(monthTF[lastK]||0);
   const growth=lastRev>0?((thisRev-lastRev)/lastRev*100):thisRev>0?100:0;
 
   // ══ KPI CARDS ══
@@ -1934,7 +2061,8 @@ function renderDashboard() {
   const dhMonthly=allMonths.map(k=>monthDH[k]||0);
   const gbMonthly=allMonths.map(k=>monthGB[k]||0);
   const caMonthly=allMonths.map(k=>monthCA[k]||0);
-  const totalMonthly=allMonths.map((_,i)=>mxMonthly[i]+dhMonthly[i]+gbMonthly[i]+caMonthly[i]);
+  const tfMonthly=allMonths.map(k=>monthTF[k]||0);
+  const totalMonthly=allMonths.map((_,i)=>mxMonthly[i]+dhMonthly[i]+gbMonthly[i]+caMonthly[i]+tfMonthly[i]);
 
   const changeHTML = (cur,prev) => {
     if(!prev) return '<span style="font-size:10px;color:var(--text-3)">—</span>';
@@ -1948,11 +2076,12 @@ function renderDashboard() {
     <div class="card green"><div style="display:flex;justify-content:space-between"><div class="lbl">Active Subs</div></div><div class="val">${activos+fGB.filter(r=>getStatus(r)!=='VENCIDO').length}</div><div class="sub">MX VIP + Gabito</div>${sparkHTML(mxMonthly,'#10b981')}</div>
     <div class="card purple"><div style="display:flex;justify-content:space-between"><div class="lbl">DarkHub Members</div></div><div class="val">${fDH.length}</div><div class="sub">Permanent access</div>${sparkHTML(dhMonthly,'#8b5cf6')}</div>
     <div class="card blue" style="border-left-color:#f59e0b"><div class="lbl">Caro Members</div><div class="val">${fCA.length}</div><div class="sub">Permanent access</div>${sparkHTML(caMonthly,'#f59e0b')}</div>
+    <div class="card blue" style="border-left-color:#ef4444"><div class="lbl">TonyFans</div><div class="val">${fTF.length}</div><div class="sub">Permanent access</div>${sparkHTML(tfMonthly,'#ef4444')}</div>
     <div class="card teal"><div style="display:flex;justify-content:space-between"><div class="lbl">This Month</div>${changeHTML(thisRev,lastRev)}</div><div class="val">${csym()}${cx(thisRev).toLocaleString()}</div><div class="sub">${new Date().toLocaleDateString('es-MX',{month:'long',year:'numeric'})}</div>${sparkHTML(gbMonthly.length?gbMonthly:totalMonthly,'#14b8a6')}</div>
   `;
 
   // ══ ANALYTICS AREA CHART ══
-  const areaData=allMonths.map(k=>(monthMX[k]||0)+(monthDH[k]||0)+(monthGB[k]||0)+(monthCA[k]||0));
+  const areaData=allMonths.map(k=>(monthMX[k]||0)+(monthDH[k]||0)+(monthGB[k]||0)+(monthCA[k]||0)+(monthTF[k]||0));
   document.getElementById('dash-analytics-total').textContent=csym()+cx(totalAll).toLocaleString();
   const changeEl=document.getElementById('dash-analytics-change');
   if(growth>=0){changeEl.style.background='rgba(16,185,129,0.12)';changeEl.style.color='#10b981';changeEl.textContent='+'+csym()+cx(thisRev-lastRev).toLocaleString();}
@@ -1984,7 +2113,7 @@ function renderDashboard() {
 
   // ══ HEATMAP ══
   const heatData={};
-  [...fMX,...fDH,...fGB,...fCA].forEach(r=>{const d=parseEnt(r);if(d){const k=d.toISOString().slice(0,10);heatData[k]=(heatData[k]||0)+1;}});
+  [...fMX,...fDH,...fGB,...fCA,...fTF].forEach(r=>{const d=parseEnt(r);if(d){const k=d.toISOString().slice(0,10);heatData[k]=(heatData[k]||0)+1;}});
   const heatTotal=Object.values(heatData).reduce((a,b)=>a+b,0);
   document.getElementById('dash-heatmap-total').textContent=heatTotal+' sales registered';
   const maxH=Math.max(...Object.values(heatData),1);
@@ -2005,7 +2134,8 @@ function renderDashboard() {
     {name:'MX VIP',members:fMX.length,revenue:totalMX,color:'#3b82f6',icon:'👑'},
     {name:'DarkHub',members:fDH.length,revenue:totalDH,color:'#8b5cf6',icon:'🛡️'},
     {name:'Gabito VIP',members:fGB.length,revenue:totalGB,color:'#6366f1',icon:'⭐'},
-    {name:'Caro',members:fCA.length,revenue:totalCA,color:'#f59e0b',icon:'😎'}
+    {name:'Caro',members:fCA.length,revenue:totalCA,color:'#f59e0b',icon:'😎'},
+    {name:'TonyFans',members:fTF.length,revenue:totalTF,color:'#ef4444',icon:'❤️'}
   ].sort((a,b)=>b.revenue-a.revenue);
   document.getElementById('dash-topgroups').innerHTML=groups.map(g=>{
     const share=totalAll>0?Math.round(g.revenue/totalAll*100):0;
@@ -2018,14 +2148,15 @@ function renderDashboard() {
   }).join('');
 
   // ══ SUBS POR MES ══
-  const subsMX={},subsDH={},subsGabito={},subsCaro={};
+  const subsMX={},subsDH={},subsGabito={},subsCaro={},subsTF={};
   fMX.forEach(r=>{const k=monthKey(parseEnt(r));if(k)subsMX[k]=(subsMX[k]||0)+1;});
   fDH.forEach(r=>{const k=monthKey(parseEnt(r));if(k)subsDH[k]=(subsDH[k]||0)+1;});
   fGB.forEach(r=>{const k=monthKey(parseEnt(r));if(k)subsGabito[k]=(subsGabito[k]||0)+1;});
   fCA.forEach(r=>{const k=monthKey(parseEnt(r));if(k)subsCaro[k]=(subsCaro[k]||0)+1;});
-  const allSubM=[...new Set([...Object.keys(subsMX),...Object.keys(subsDH),...Object.keys(subsGabito),...Object.keys(subsCaro)])].sort().slice(-8);
-  const vMX=allSubM.map(k=>subsMX[k]||0),vDH=allSubM.map(k=>subsDH[k]||0),vGB=allSubM.map(k=>subsGabito[k]||0),vCA=allSubM.map(k=>subsCaro[k]||0);
-  const vTotal=allSubM.map((_,i)=>vMX[i]+vDH[i]+vGB[i]+vCA[i]);
+  fTF.forEach(r=>{const k=monthKey(parseEnt(r));if(k)subsTF[k]=(subsTF[k]||0)+1;});
+  const allSubM=[...new Set([...Object.keys(subsMX),...Object.keys(subsDH),...Object.keys(subsGabito),...Object.keys(subsCaro),...Object.keys(subsTF)])].sort().slice(-8);
+  const vMX=allSubM.map(k=>subsMX[k]||0),vDH=allSubM.map(k=>subsDH[k]||0),vGB=allSubM.map(k=>subsGabito[k]||0),vCA=allSubM.map(k=>subsCaro[k]||0),vTF=allSubM.map(k=>subsTF[k]||0);
+  const vTotal=allSubM.map((_,i)=>vMX[i]+vDH[i]+vGB[i]+vCA[i]+vTF[i]);
 
   if(window._chartSubs)window._chartSubs.destroy();
   window._chartSubs=new Chart(document.getElementById('chartSubsMes'),{
@@ -2034,17 +2165,18 @@ function renderDashboard() {
       {label:'MX VIP',data:vMX,backgroundColor:'#3b82f6',borderRadius:3,borderSkipped:false},
       {label:'DarkHub',data:vDH,backgroundColor:'#8b5cf6',borderRadius:3,borderSkipped:false},
       {label:'Gabito',data:vGB,backgroundColor:'#6366f1',borderRadius:3,borderSkipped:false},
-      {label:'Caro',data:vCA,backgroundColor:'#f59e0b',borderRadius:3,borderSkipped:false}
+      {label:'Caro',data:vCA,backgroundColor:'#f59e0b',borderRadius:3,borderSkipped:false},
+      {label:'TonyFans',data:vTF,backgroundColor:'#ef4444',borderRadius:3,borderSkipped:false}
     ]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},boxWidth:8}},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:10},stepSize:1}}}}
   });
-  const mMX=vMX[vMX.length-1]||0,mDH=vDH[vDH.length-1]||0,mGB=vGB[vGB.length-1]||0,mCA=vCA[vCA.length-1]||0;
-  document.getElementById('dash-subs-totals').innerHTML=`<span>MX: <strong>${mMX}</strong></span><span>DH: <strong>${mDH}</strong></span><span>Gabito: <strong>${mGB}</strong></span><span>Caro: <strong>${mCA}</strong></span><span>Total: <strong>${mMX+mDH+mGB+mCA}</strong></span>`;
+  const mMX=vMX[vMX.length-1]||0,mDH=vDH[vDH.length-1]||0,mGB=vGB[vGB.length-1]||0,mCA=vCA[vCA.length-1]||0,mTF=vTF[vTF.length-1]||0;
+  document.getElementById('dash-subs-totals').innerHTML=`<span>MX: <strong>${mMX}</strong></span><span>DH: <strong>${mDH}</strong></span><span>Gabito: <strong>${mGB}</strong></span><span>Caro: <strong>${mCA}</strong></span><span>TonyFans: <strong>${mTF}</strong></span><span>Total: <strong>${mMX+mDH+mGB+mCA+mTF}</strong></span>`;
 
   // ══ DAYS OF WEEK ══
   const dowLabels=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const dowCount=[0,0,0,0,0,0,0];
-  [...fMX,...fDH,...fGB,...fCA].forEach(r=>{const d=parseEnt(r);if(d)dowCount[d.getDay()]++;});
+  [...fMX,...fDH,...fGB,...fCA,...fTF].forEach(r=>{const d=parseEnt(r);if(d)dowCount[d.getDay()]++;});
   if(window._chartDow)window._chartDow.destroy();
   window._chartDow=new Chart(document.getElementById('chartDow'),{
     type:'bar',
@@ -2091,10 +2223,10 @@ let _analisisCharts = {};
 function renderAnalisis() {
 
   // ─ KPI cards
-  const totalRevAll = mxData.reduce((a,r)=>a+r.monto,0) + dhData.reduce((a,r)=>a+r.monto,0) + gabitoData.reduce((a,r)=>a+r.monto,0) + caroData.reduce((a,r)=>a+r.monto,0);
+  const totalRevAll = mxData.reduce((a,r)=>a+r.monto,0) + dhData.reduce((a,r)=>a+r.monto,0) + gabitoData.reduce((a,r)=>a+r.monto,0) + caroData.reduce((a,r)=>a+r.monto,0) + tonyfansData.reduce((a,r)=>a+r.monto,0);
   const avgTicket = mxData.length ? Math.round(mxData.reduce((a,r)=>a+r.monto,0)/mxData.length) : 0;
   const retPct = mxData.length ? Math.round((mxData.filter(r=>{const s=getStatus(r);return s==='ACTIVO'||s==='PRÓXIMO'||s==='VENCE HOY'||s==='PERMANENTE';}).length)/mxData.length*100) : 0;
-  const totalClients = new Set([...mxData,...dhData,...gabitoData,...caroData].map(r=>r.id).filter(Boolean)).size;
+  const totalClients = new Set([...mxData,...dhData,...gabitoData,...caroData,...tonyfansData].map(r=>r.id).filter(Boolean)).size;
   document.getElementById('analisis-kpis').innerHTML = `
     <div class="card blue"><div class="lbl">Total Revenue</div><div class="val">${csym()}${cx(totalRevAll).toLocaleString()}</div><div class="sub">All time, all groups</div></div>
     <div class="card purple"><div class="lbl">Avg Ticket MX VIP</div><div class="val">${csym()}${cx(avgTicket)}</div><div class="sub">Per subscriber</div></div>
@@ -2145,6 +2277,7 @@ function renderAnalisis() {
   const mxIds = new Set(mxData.map(r=>r.id).filter(Boolean));
   const dhIds = new Set(dhData.map(r=>r.id).filter(Boolean));
   const caroIds = new Set(caroData.map(r=>r.id).filter(Boolean));
+  const tfIds = new Set(tonyfansData.map(r=>r.id).filter(Boolean));
   const ambos = [...mxIds].filter(id => dhIds.has(id)).length;
   const ambosCaro = [...mxIds].filter(id => caroIds.has(id)).length;
   const soloMX = mxIds.size - ambos, soloDH = dhIds.size - ambos;
@@ -2171,7 +2304,7 @@ function renderAnalisis() {
 
   // ─ Métodos de pago
   const metodoCount = {};
-  [...mxData, ...dhData, ...gabitoData, ...caroData].forEach(r => { const m = r.metodo || 'Sin registrar'; metodoCount[m] = (metodoCount[m]||0)+1; });
+  [...mxData, ...dhData, ...gabitoData, ...caroData, ...tonyfansData].forEach(r => { const m = r.metodo || 'Sin registrar'; metodoCount[m] = (metodoCount[m]||0)+1; });
   const metLabels = Object.keys(metodoCount).sort((a,b) => metodoCount[b]-metodoCount[a]);
   if (window._chartMetodos) window._chartMetodos.destroy();
   window._chartMetodos = new Chart(document.getElementById('chartMetodos'), {
@@ -2199,7 +2332,7 @@ function renderAnalisis() {
   const parseEnt2 = r => { if(!r.entrada)return null; const p=r.entrada.split('/'); if(p.length!==3)return null; try{return new Date(2000+parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}catch(e){return null;} };
   const monthKey2 = d => d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:null;
   const ingByMonth = {};
-  [...mxData,...dhData,...gabitoData,...caroData].forEach(r=>{ const k=monthKey2(parseEnt2(r)); if(k) ingByMonth[k]=(ingByMonth[k]||0)+r.monto; });
+  [...mxData,...dhData,...gabitoData,...caroData,...tonyfansData].forEach(r=>{ const k=monthKey2(parseEnt2(r)); if(k) ingByMonth[k]=(ingByMonth[k]||0)+r.monto; });
   const sortedMonths = Object.keys(ingByMonth).sort().slice(-3);
   const last3 = sortedMonths.map(k=>ingByMonth[k]);
   const proyeccion = last3.length >= 2 ? Math.round(last3.reduce((a,b)=>a+b,0)/last3.length) : null;
@@ -2382,8 +2515,17 @@ function exportar(grupo) {
       'Metodo': r.metodo || ''
     }));
     descargarExcel(data, [22,14,8,14], 'Caro', 'Caro');
+  } else if (grupo === 'TonyFans') {
+    if (tonyfansData.length === 0) { alert('No hay datos TonyFans'); return; }
+    const data = tonyfansData.map(r => ({
+      'Nombre': r.nombre,
+      'ID': r.id,
+      'Pago': r.monto,
+      'Metodo': r.metodo || ''
+    }));
+    descargarExcel(data, [22,14,8,14], 'TonyFans', 'TonyFans');
   } else if (grupo === 'todos') {
-    if (mxData.length === 0 && dhData.length === 0 && caroData.length === 0) { alert('No hay datos'); return; }
+    if (mxData.length === 0 && dhData.length === 0 && caroData.length === 0 && tonyfansData.length === 0) { alert('No hay datos'); return; }
     const dataMX = mxData.map(r => ({
       'Nombre': r.nombre, 'ID': r.id, 'Duracion': r.plan,
       'Entrada - Salida': r.fechas, 'Pago': r.monto,
@@ -2402,7 +2544,13 @@ function exportar(grupo) {
       'Dias restantes': '', 'Estado': 'PERMANENTE',
       'Metodo': r.metodo || '', 'Grupo': 'Caro'
     }));
-    descargarExcel([...dataMX,...dataDH,...dataCA], [22,14,12,24,8,14,10,14,10], 'Todo', 'VIP_completo');
+    const dataTF = tonyfansData.map(r => ({
+      'Nombre': r.nombre, 'ID': r.id, 'Duracion': 'Permanente',
+      'Entrada - Salida': 'Permanente', 'Pago': r.monto,
+      'Dias restantes': '', 'Estado': 'PERMANENTE',
+      'Metodo': r.metodo || '', 'Grupo': 'TonyFans'
+    }));
+    descargarExcel([...dataMX,...dataDH,...dataCA,...dataTF], [22,14,12,24,8,14,10,14,10], 'Todo', 'VIP_completo');
   }
 }
 
@@ -2413,10 +2561,12 @@ function renderMemStats() {
     DarkHub: <strong>${dhData.length}</strong> miembros<br>
     Gabito VIP: <strong>${gabitoData.length}</strong> registros totales<br>
     Caro: <strong>${caroData.length}</strong> miembros<br>
+    TonyFans: <strong>${tonyfansData.length}</strong> miembros<br>
     Total ingresos MX VIP: <strong>$${Math.round(mxData.reduce((a,r)=>a+r.monto,0)).toLocaleString()}</strong><br>
     Total ingresos DarkHub: <strong>$${Math.round(dhData.reduce((a,r)=>a+r.monto,0)).toLocaleString()}</strong><br>
     Total ingresos Gabito VIP: <strong>$${Math.round(gabitoData.reduce((a,r)=>a+r.monto,0)).toLocaleString()}</strong><br>
-    Total ingresos Caro: <strong>$${Math.round(caroData.reduce((a,r)=>a+r.monto,0)).toLocaleString()}</strong>
+    Total ingresos Caro: <strong>$${Math.round(caroData.reduce((a,r)=>a+r.monto,0)).toLocaleString()}</strong><br>
+    Total ingresos TonyFans: <strong>$${Math.round(tonyfansData.reduce((a,r)=>a+r.monto,0)).toLocaleString()}</strong>
   `;
 }
 
@@ -2476,10 +2626,36 @@ function importarCaro(input) {
   reader.readAsArrayBuffer(file);
 }
 
+function importarTonyfans(input) {
+  const file = input.files[0]; if (!file) return;
+  const st = document.getElementById('import-tonyfans-status');
+  st.textContent = 'Leyendo...';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      let added = 0;
+      for (let i=0; i<rows.length; i++) {
+        const r = rows[i];
+        const nombre = String(r[0]||'').trim();
+        const id = String(r[1]||'').replace('.0','').trim();
+        if (!nombre) continue;
+        tonyfansData.push({ grupo:'TonyFans', nombre, id, plan:'Permanente', fechas:'Permanente', entrada:'', salida:'Permanente', monto:200, metodo:'', status:'PERMANENTE', historico:true });
+        added++;
+      }
+      saveData(); updateHeader(); renderTonyfansTable();
+      st.textContent = `\u2713 ${added} registros importados de ${file.name}`;
+    } catch(err) { st.textContent = 'Error: '+err.message; }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
 function resetTodo() {
   if (!confirm('¿Borrar TODOS los datos? Se perderán los registros nuevos. Los datos históricos se recargarán.')) return;
-  localStorage.removeItem('vip_mx'); localStorage.removeItem('vip_dh'); localStorage.removeItem('vip_gabito'); localStorage.removeItem('vip_caro');
-  loadData(); updateHeader(); renderMXTable(); renderDHTable(); renderCaroTable(); renderMemStats();
+  localStorage.removeItem('vip_mx'); localStorage.removeItem('vip_dh'); localStorage.removeItem('vip_gabito'); localStorage.removeItem('vip_caro'); localStorage.removeItem('vip_tonyfans');
+  loadData(); updateHeader(); renderMXTable(); renderDHTable(); renderCaroTable(); renderTonyfansTable(); renderMemStats();
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
@@ -2488,6 +2664,7 @@ initFirebase();
 updateHeader();
 renderMXTable();
 renderCaroTable();
+renderTonyfansTable();
 renderDashboard();
 
 // Set today as default date
@@ -2499,6 +2676,7 @@ document.getElementById('mx-entrada').value = `${yyyy}-${mm}-${dd}`;
 if(document.getElementById('dh-entrada')) document.getElementById('dh-entrada').value = `${yyyy}-${mm}-${dd}`;
 document.getElementById('gabito-entrada').value = `${yyyy}-${mm}-${dd}`;
 document.getElementById('caro-entrada').value = `${yyyy}-${mm}-${dd}`;
+document.getElementById('tonyfans-entrada').value = `${yyyy}-${mm}-${dd}`;
 calcFechasGabito();
 calcFechasMX();
 </script>
