@@ -821,6 +821,11 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
       TonyFans
       <span class="sb-badge" id="sb-tonyfans-badge">—</span>
     </button>
+    <button class="sb-item" onclick="switchTab('seguimiento',this)" data-tab="seguimiento">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Seguimiento
+      <span class="sb-badge" id="sb-seg-badge">—</span>
+    </button>
     <div class="sb-section-label" style="margin-top:16px">Herramientas</div>
     <button class="sb-item" onclick="switchTab('analisis',this)" data-tab="analisis">
       <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -1073,6 +1078,97 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
       <tbody id="tonyfans-tbody"></tbody>
     </table></div>
     <div id="tonyfans-pager" class="page-bar"></div>
+  </div>
+</main>
+</div>
+
+<!-- ===== SEGUIMIENTO 2 SEMANAS ===== -->
+<div id="tab-seguimiento" class="tab-content">
+<main>
+  <div class="slabel">Nuevo cliente — Seguimiento 2 Semanas</div>
+  <div class="panel">
+    <div class="toast" id="toast-seg"></div>
+    <div class="row2">
+      <div class="field"><label>Nombre / @ Telegram</label><input type="text" id="seg-nombre" placeholder="@usuario o nombre" autocomplete="off"></div>
+      <div class="field"><label>ID Telegram</label><input type="text" id="seg-id" placeholder="123456789"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Grupo VIP</label>
+        <select id="seg-grupo">
+          <option>MX VIP</option>
+          <option>DarkHub</option>
+          <option>Gabito VIP</option>
+          <option>Caro</option>
+          <option>TonyFans</option>
+        </select>
+      </div>
+      <div class="field"><label>Monto ($)</label><input type="number" id="seg-monto" placeholder="150"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Fecha de compra</label>
+        <input type="date" id="seg-compra" oninput="calcFechasSeg()">
+      </div>
+      <div class="field"><label>Fecha de vencimiento</label>
+        <input type="date" id="seg-vencimiento" readonly style="background:rgba(255,255,255,0.04);color:var(--text-2)">
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px">Se calcula automáticamente (+14 días)</div>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Método de pago</label>
+        <select id="seg-metodo">
+          <option>Transferencia MX</option><option>PayPal</option><option>Efectivo</option><option>Stripe</option><option>Crypto</option>
+        </select>
+      </div>
+      <div class="field"><label>Notas (opcional)</label>
+        <input type="text" id="seg-notas" placeholder="Ej: interesado en permanente">
+      </div>
+    </div>
+    <button class="btn-primary" onclick="registrarSeg()">Guardar en Seguimiento</button>
+  </div>
+
+  <!-- KPIs rápidos -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--amber)" id="seg-kpi-hoy">0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">⏰ Vencen Hoy</div>
+    </div>
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--red)" id="seg-kpi-manana">0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">📅 Vencen Mañana</div>
+    </div>
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--emerald)" id="seg-kpi-activos">0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">✅ Activos</div>
+    </div>
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--gold2)" id="seg-kpi-convertidos">0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">💰 Convertidos</div>
+    </div>
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--text-3)" id="seg-kpi-vencidos">0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">❌ Vencidos</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h3 style="margin:0">Clientes 2 Semanas</h3>
+      <span style="font-size:12px;color:#aaa" id="seg-count-label"></span>
+    </div>
+    <input class="search-input" type="text" id="seg-search" placeholder="Buscar por nombre, ID o grupo..." oninput="segPage=1;renderSegTable(this.value)">
+    <div class="filter-row" id="seg-filters">
+      <button class="filter-btn active" onclick="setFilterSeg('TODOS',this)">Todos</button>
+      <button class="filter-btn" onclick="setFilterSeg('HOY',this)">⏰ Hoy</button>
+      <button class="filter-btn" onclick="setFilterSeg('MAÑANA',this)">📅 Mañana</button>
+      <button class="filter-btn" onclick="setFilterSeg('ACTIVO',this)">Activos</button>
+      <button class="filter-btn" onclick="setFilterSeg('CONVERTIDO',this)">💰 Convertidos</button>
+      <button class="filter-btn" onclick="setFilterSeg('VENCIDO',this)">Vencidos</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Nombre</th><th>Grupo</th><th>Compra</th><th>Vence</th><th>Estado</th><th>Días</th><th>$</th><th>Notas</th><th></th></tr></thead>
+      <tbody id="seg-tbody"></tbody>
+    </table></div>
+    <div id="seg-pager" class="page-bar"></div>
   </div>
 </main>
 </div>
@@ -1430,11 +1526,13 @@ const HIST_DH = [{"grupo":"DarkHub","nombre":".","id":"7074836753","plan":"Perma
 const HIST_CARO = [{"grupo":"Caro","nombre":".....","id":"7782412523","plan":"Permanente","fechas":"Permanente","entrada":"02/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Witti","id":"1895890496","plan":"Permanente","fechas":"Permanente","entrada":"23/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"a","id":"1620449728","plan":"Permanente","fechas":"Permanente","entrada":"30/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Lopez","id":"1087881347","plan":"Permanente","fechas":"Permanente","entrada":"15/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"L","id":"6052248377","plan":"Permanente","fechas":"Permanente","entrada":"18/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@eddccc0102","id":"1773351172","plan":"Permanente","fechas":"Permanente","entrada":"26/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Patricio","id":"5242476942","plan":"Permanente","fechas":"Permanente","entrada":"21/10/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@ManuB4R","id":"1445462677","plan":"Permanente","fechas":"Permanente","entrada":"06/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@ruisu_seretto","id":"765985660","plan":"Permanente","fechas":"Permanente","entrada":"17/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"josue","id":"646747331","plan":"Permanente","fechas":"Permanente","entrada":"17/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@sisislola","id":"1575135318","plan":"Permanente","fechas":"Permanente","entrada":"20/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Jsjd Djjd","id":"7816065755","plan":"Permanente","fechas":"Permanente","entrada":"22/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Verazaluce93","id":"1219642520","plan":"Permanente","fechas":"Permanente","entrada":"25/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@J_s4_4","id":"6412641636","plan":"Permanente","fechas":"Permanente","entrada":"27/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Durán","id":"5249611827","plan":"Permanente","fechas":"Permanente","entrada":"28/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Mapa_chito","id":"5545466804","plan":"Permanente","fechas":"Permanente","entrada":"29/11/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@desconocido_234","id":"1022800977","plan":"Permanente","fechas":"Permanente","entrada":"03/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@crz128","id":"1276720618","plan":"Permanente","fechas":"Permanente","entrada":"04/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@MrOkruss","id":"927830708","plan":"Permanente","fechas":"Permanente","entrada":"04/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Juan Cos","id":"6132079568","plan":"Permanente","fechas":"Permanente","entrada":"11/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Looll","id":"8144022125","plan":"Permanente","fechas":"Permanente","entrada":"16/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@JeffWarren16","id":"6564384366","plan":"Permanente","fechas":"Permanente","entrada":"27/12/25","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Victor","id":"7159213764","plan":"Permanente","fechas":"Permanente","entrada":"01/01/26","salida":"Permanente","monto":200,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Marino Vazques","id":"6825294953","plan":"Permanente","fechas":"Permanente","entrada":"01/01/26","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"k","id":"6101703576","plan":"Permanente","fechas":"Permanente","entrada":"12/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Uno.","id":"1286267009","plan":"Permanente","fechas":"Permanente","entrada":"17/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"AR","id":"5084200898","plan":"Permanente","fechas":"Permanente","entrada":"18/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Peraljuan","id":"1543367622","plan":"Permanente","fechas":"Permanente","entrada":"22/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"d\\{","id":"5542678397","plan":"Permanente","fechas":"Permanente","entrada":"22/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Larr","id":"6513329564","plan":"Permanente","fechas":"Permanente","entrada":"24/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"JC","id":"427059839","plan":"Permanente","fechas":"Permanente","entrada":"29/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@OAOR25","id":"6865802572","plan":"Permanente","fechas":"Permanente","entrada":"30/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Pepe Pepe Pepe","id":"8202883317","plan":"Permanente","fechas":"Permanente","entrada":"30/01/26","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"tomasx","id":"1980738013","plan":"Permanente","fechas":"Permanente","entrada":"31/01/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Vale","id":"6567996135","plan":"Permanente","fechas":"Permanente","entrada":"01/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Leslie","id":"8347358978","plan":"Permanente","fechas":"Permanente","entrada":"02/02/26","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Secret","id":"1938936310","plan":"Permanente","fechas":"Permanente","entrada":"03/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Dtvh","id":"7880989230","plan":"Permanente","fechas":"Permanente","entrada":"03/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Tony_klk","id":"5007578462","plan":"Permanente","fechas":"Permanente","entrada":"20/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Najeliad","id":"6836662121","plan":"Permanente","fechas":"Permanente","entrada":"19/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Luis G","id":"7035212352","plan":"Permanente","fechas":"Permanente","entrada":"20/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"El Cholo","id":"7738962045","plan":"Permanente","fechas":"Permanente","entrada":"25/02/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@crhistianmachado","id":"8202193992","plan":"Permanente","fechas":"Permanente","entrada":"10/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@ffgvjvvd","id":"7593650459","plan":"Permanente","fechas":"Permanente","entrada":"12/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Franz Krommer","id":"8572379555","plan":"Permanente","fechas":"Permanente","entrada":"14/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Saul0105","id":"1219653686","plan":"Permanente","fechas":"Permanente","entrada":"15/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Mx","id":"6686824936","plan":"Permanente","fechas":"Permanente","entrada":"15/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Esobrad 23","id":"6947600285","plan":"Permanente","fechas":"Permanente","entrada":"15/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@nftlovertho","id":"925668993","plan":"Permanente","fechas":"Permanente","entrada":"16/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"U Y","id":"1577248591","plan":"Permanente","fechas":"Permanente","entrada":"16/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"anibal garcia","id":"1626005516","plan":"Permanente","fechas":"Permanente","entrada":"17/03/26","salida":"Permanente","monto":500,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"76820","id":"6385569645","plan":"Permanente","fechas":"Permanente","entrada":"17/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Daniel Cabrera","id":"1294431538","plan":"Permanente","fechas":"Permanente","entrada":"19/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Jose Torres","id":"7035827738","plan":"Permanente","fechas":"Permanente","entrada":"20/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Osndt0827","id":"1441632507","plan":"Permanente","fechas":"Permanente","entrada":"21/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Cris RG","id":"7191313901","plan":"Permanente","fechas":"Permanente","entrada":"21/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Black Jack","id":"7424518702","plan":"Permanente","fechas":"Permanente","entrada":"22/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Ashley Sanchez","id":"8480409796","plan":"Permanente","fechas":"Permanente","entrada":"22/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"Jamil Weys","id":"6817138278","plan":"Permanente","fechas":"Permanente","entrada":"25/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true},{"grupo":"Caro","nombre":"@Petikuye","id":"5339396491","plan":"Permanente","fechas":"Permanente","entrada":"27/03/26","salida":"Permanente","monto":1000,"metodo":"","status":"PERMANENTE","historico":true}];
 
 const HIST_TONYFANS = [];
+const HIST_CLIENTES2SEMANAS = [];
 let mxData = [];
 let dhData = [];
 let gabitoData = [];
 let caroData = [];
 let tonyfansData = [];
+let clientes2semanasData = [];
 
 let _lsOk = false;
 function testLS() {
@@ -1449,15 +1547,18 @@ function loadData() {
     const savedGabito = localStorage.getItem('vip_gabito');
     const savedCaro = localStorage.getItem('vip_caro');
     const savedTonyfans = localStorage.getItem('vip_tonyfans');
+    const savedClientes2 = localStorage.getItem('clientes_2semanas');
     mxData = savedMX ? JSON.parse(savedMX) : [...HIST_MX];
     dhData = savedDH ? JSON.parse(savedDH) : [...HIST_DH];
     caroData = savedCaro ? JSON.parse(savedCaro) : [...HIST_CARO];
     tonyfansData = savedTonyfans ? JSON.parse(savedTonyfans) : [...HIST_TONYFANS];
+    clientes2semanasData = savedClientes2 ? JSON.parse(savedClientes2) : [...HIST_CLIENTES2SEMANAS];
   } else {
     mxData = [...HIST_MX];
     dhData = [...HIST_DH];
     caroData = [...HIST_CARO];
     tonyfansData = [...HIST_TONYFANS];
+    clientes2semanasData = [...HIST_CLIENTES2SEMANAS];
     setTimeout(showLSWarning, 800);
   }
 }
@@ -1470,11 +1571,12 @@ function saveData() {
       localStorage.setItem('vip_gabito', JSON.stringify(gabitoData));
       localStorage.setItem('vip_caro', JSON.stringify(caroData));
       localStorage.setItem('vip_tonyfans', JSON.stringify(tonyfansData));
+      localStorage.setItem('clientes_2semanas', JSON.stringify(clientes2semanasData));
     } catch(e) { _lsOk = false; showLSWarning(); }
   } else { showLSWarning(); }
   if (db) {
     setSyncStatus('syncing');
-    Promise.all([db.ref('vip_mx').set(mxData), db.ref('vip_dh').set(dhData), db.ref('vip_gabito').set(gabitoData), db.ref('vip_caro').set(caroData), db.ref('vip_tonyfans').set(tonyfansData)])
+    Promise.all([db.ref('vip_mx').set(mxData), db.ref('vip_dh').set(dhData), db.ref('vip_gabito').set(gabitoData), db.ref('vip_caro').set(caroData), db.ref('vip_tonyfans').set(tonyfansData), db.ref('clientes_2semanas').set(clientes2semanasData)])
       .then(() => setSyncStatus('synced'))
       .catch(() => setSyncStatus('error'));
   }
@@ -1819,6 +1921,177 @@ function setMxPage(p) { mxPage = p; renderMXTable(); }
 function setDhPage(p) { dhPage = p; renderDHTable(); }
 function setCaroPage(p) { caroPage = p; renderCaroTable(); }
 function setTonyfansPage(p) { tonyfansPage = p; renderTonyfansTable(); }
+function setSegPage(p) { segPage = p; renderSegTable(); }
+
+// ─── SEGUIMIENTO 2 SEMANAS ───────────────────────────────────────────────────
+let segPage = 1;
+let segFilter = 'TODOS';
+
+function calcFechasSeg() {
+  const compra = document.getElementById('seg-compra').value;
+  if (!compra) return;
+  const d = new Date(compra);
+  d.setDate(d.getDate() + 14);
+  const venc = d.toISOString().split('T')[0];
+  document.getElementById('seg-vencimiento').value = venc;
+}
+
+function calcEstadoSeg(vencimiento) {
+  if (!vencimiento) return 'ACTIVO';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const venc = new Date(vencimiento + 'T00:00:00');
+  const dias = Math.round((venc - today) / 86400000);
+  if (dias < 0) return 'VENCIDO';
+  if (dias === 0) return 'HOY';
+  if (dias === 1) return 'MAÑANA';
+  return 'ACTIVO';
+}
+
+function calcDiasSeg(vencimiento) {
+  if (!vencimiento) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const venc = new Date(vencimiento + 'T00:00:00');
+  return Math.round((venc - today) / 86400000);
+}
+
+function formatDateSeg(dateStr) {
+  if (!dateStr) return '';
+  const [y,m,d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function registrarSeg() {
+  const nombre = document.getElementById('seg-nombre').value.trim();
+  const id = document.getElementById('seg-id').value.trim();
+  const grupo = document.getElementById('seg-grupo').value;
+  const monto = parseFloat(document.getElementById('seg-monto').value) || 150;
+  const compra = document.getElementById('seg-compra').value;
+  const vencimiento = document.getElementById('seg-vencimiento').value;
+  const metodo = document.getElementById('seg-metodo').value;
+  const notas = document.getElementById('seg-notas').value.trim();
+  const toast = document.getElementById('toast-seg');
+
+  if (!nombre) { toast.textContent = '⚠ Ingresa nombre o @Telegram'; toast.style.display='block'; setTimeout(()=>toast.style.display='none',3000); return; }
+  if (!compra) { toast.textContent = '⚠ Ingresa fecha de compra'; toast.style.display='block'; setTimeout(()=>toast.style.display='none',3000); return; }
+
+  const reg = {
+    nombre, id, grupo, monto, metodo, notas,
+    fecha_compra: formatDateSeg(compra),
+    fecha_vencimiento: formatDateSeg(vencimiento || ''),
+    fecha_compra_iso: compra,
+    fecha_vencimiento_iso: vencimiento,
+    estado: 'ACTIVO',
+    ts: Date.now()
+  };
+
+  clientes2semanasData.unshift(reg);
+  saveData();
+  renderSegTable();
+  updateSegBadge();
+
+  // Limpiar form
+  ['seg-nombre','seg-id','seg-monto','seg-compra','seg-vencimiento','seg-notas'].forEach(id => document.getElementById(id).value = '');
+  toast.textContent = `✓ ${nombre} agregado al seguimiento`;
+  toast.style.background = '#10b981';
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 3000);
+}
+
+function convertirSeg(idx) {
+  if (!confirm('¿Marcar como convertido a permanente?')) return;
+  clientes2semanasData[idx].estado = 'CONVERTIDO';
+  saveData();
+  renderSegTable();
+  updateSegBadge();
+}
+
+function eliminarSeg(idx) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  clientes2semanasData.splice(idx, 1);
+  saveData();
+  renderSegTable();
+  updateSegBadge();
+}
+
+function setFilterSeg(f, btn) {
+  segFilter = f; segPage = 1;
+  document.querySelectorAll('#seg-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSegTable();
+}
+
+function updateSegBadge() {
+  const urgentes = clientes2semanasData.filter(c => {
+    if (c.estado === 'CONVERTIDO' || c.estado === 'VENCIDO') return false;
+    const st = calcEstadoSeg(c.fecha_vencimiento_iso);
+    return st === 'HOY' || st === 'MAÑANA';
+  }).length;
+  const badge = document.getElementById('sb-seg-badge');
+  if (badge) badge.textContent = urgentes > 0 ? urgentes : clientes2semanasData.filter(c=>c.estado==='ACTIVO'||c.estado==='HOY'||c.estado==='MAÑANA').length || '—';
+}
+
+function renderSegTable(search) {
+  if (search === undefined) search = document.getElementById('seg-search')?.value || '';
+  const tbody = document.getElementById('seg-tbody');
+  if (!tbody) return;
+
+  let data = clientes2semanasData.map((r,i) => ({
+    ...r,
+    _idx: i,
+    _estado: r.estado === 'CONVERTIDO' ? 'CONVERTIDO' : r.estado === 'VENCIDO' ? 'VENCIDO' : calcEstadoSeg(r.fecha_vencimiento_iso),
+    _dias: r.estado === 'CONVERTIDO' ? null : calcDiasSeg(r.fecha_vencimiento_iso)
+  }));
+
+  if (segFilter !== 'TODOS') data = data.filter(r => r._estado === segFilter);
+  if (search) { const q = search.toLowerCase(); data = data.filter(r => r.nombre.toLowerCase().includes(q) || r.id.includes(q) || r.grupo.toLowerCase().includes(q)); }
+
+  const total = data.length;
+  document.getElementById('seg-count-label').textContent = `${total} clientes`;
+
+  // KPIs
+  const allData = clientes2semanasData.map(r => ({...r, _estado: r.estado === 'CONVERTIDO' ? 'CONVERTIDO' : r.estado === 'VENCIDO' ? 'VENCIDO' : calcEstadoSeg(r.fecha_vencimiento_iso)}));
+  document.getElementById('seg-kpi-hoy').textContent = allData.filter(r=>r._estado==='HOY').length;
+  document.getElementById('seg-kpi-manana').textContent = allData.filter(r=>r._estado==='MAÑANA').length;
+  document.getElementById('seg-kpi-activos').textContent = allData.filter(r=>r._estado==='ACTIVO').length;
+  document.getElementById('seg-kpi-convertidos').textContent = allData.filter(r=>r._estado==='CONVERTIDO').length;
+  document.getElementById('seg-kpi-vencidos').textContent = allData.filter(r=>r._estado==='VENCIDO').length;
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (segPage > totalPages) segPage = totalPages;
+  const pageData = data.slice((segPage-1)*PAGE_SIZE, segPage*PAGE_SIZE);
+
+  const colores = { 'HOY':'#f59e0b', 'MAÑANA':'#ef4444', 'ACTIVO':'#10b981', 'CONVERTIDO':'#6366f1', 'VENCIDO':'#6b7280' };
+  const emojis  = { 'HOY':'⏰', 'MAÑANA':'📅', 'ACTIVO':'✅', 'CONVERTIDO':'💰', 'VENCIDO':'❌' };
+
+  if (pageData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#bbb;padding:20px">Sin resultados</td></tr>';
+  } else {
+    tbody.innerHTML = pageData.map(r => {
+      const color = colores[r._estado] || '#aaa';
+      const emoji = emojis[r._estado] || '';
+      const diasStr = r._dias !== null && r._dias !== undefined ? (r._dias === 0 ? 'Hoy' : r._dias < 0 ? `${Math.abs(r._dias)}d venc.` : `${r._dias}d`) : '—';
+      const noConvert = r._estado === 'CONVERTIDO' || r._estado === 'VENCIDO';
+      return `<tr>
+        <td style="font-weight:600">${r.nombre}</td>
+        <td><span style="font-size:11px;background:rgba(99,102,241,0.12);color:var(--gold2);padding:2px 8px;border-radius:99px">${r.grupo}</span></td>
+        <td style="color:var(--text-2);font-size:12px">${r.fecha_compra || '—'}</td>
+        <td style="color:var(--text-2);font-size:12px">${r.fecha_vencimiento || '—'}</td>
+        <td><span style="font-size:11px;font-weight:700;color:${color}">${emoji} ${r._estado}</span></td>
+        <td style="text-align:right;color:${color};font-weight:700">${diasStr}</td>
+        <td style="text-align:right">$${r.monto}</td>
+        <td style="color:var(--text-3);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notas || '—'}</td>
+        <td>
+          <div style="display:flex;gap:6px;justify-content:flex-end">
+            ${!noConvert ? `<button onclick="convertirSeg(${r._idx})" style="font-size:10px;padding:3px 8px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;color:var(--gold2);cursor:pointer" title="Convertir a permanente">💰</button>` : ''}
+            <button onclick="eliminarSeg(${r._idx})" style="font-size:10px;padding:3px 8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:6px;color:#ef4444;cursor:pointer">✕</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+  renderPager('seg-pager', segPage, totalPages, 'setSegPage');
+  updateSegBadge();
+}
 function renderPager(id, cur, total, setter) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -2654,8 +2927,8 @@ function importarTonyfans(input) {
 
 function resetTodo() {
   if (!confirm('¿Borrar TODOS los datos? Se perderán los registros nuevos. Los datos históricos se recargarán.')) return;
-  localStorage.removeItem('vip_mx'); localStorage.removeItem('vip_dh'); localStorage.removeItem('vip_gabito'); localStorage.removeItem('vip_caro'); localStorage.removeItem('vip_tonyfans');
-  loadData(); updateHeader(); renderMXTable(); renderDHTable(); renderCaroTable(); renderTonyfansTable(); renderMemStats();
+  localStorage.removeItem('vip_mx'); localStorage.removeItem('vip_dh'); localStorage.removeItem('vip_gabito'); localStorage.removeItem('vip_caro'); localStorage.removeItem('vip_tonyfans'); localStorage.removeItem('clientes_2semanas');
+  loadData(); updateHeader(); renderMXTable(); renderDHTable(); renderCaroTable(); renderTonyfansTable(); renderSegTable(); renderMemStats();
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
@@ -2665,6 +2938,7 @@ updateHeader();
 renderMXTable();
 renderCaroTable();
 renderTonyfansTable();
+renderSegTable();
 renderDashboard();
 
 // Set today as default date
