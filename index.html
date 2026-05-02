@@ -1303,6 +1303,7 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
     <div style="display:flex;gap:10px;align-items:center">
       <select id="dash-period" onchange="renderDashboard()" style="padding:7px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:11px;font-family:inherit;cursor:pointer">
         <option value="month">This month</option>
+        <option value="lastmonth">Last month</option>
         <option value="year">This year</option>
         <option value="all" selected>All time</option>
       </select>
@@ -2587,11 +2588,13 @@ function renderDashboard() {
   // Period filter
   const period = document.getElementById('dash-period').value;
   const now = new Date();
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const filterDate = r => {
     if (period==='all') return true;
     const d = parseEnt(r);
     if (!d) return false;
     if (period==='month') return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    if (period==='lastmonth') return d.getMonth()===lastMonth.getMonth() && d.getFullYear()===lastMonth.getFullYear();
     if (period==='year') return d.getFullYear()===now.getFullYear();
     return true;
   };
@@ -2622,9 +2625,20 @@ function renderDashboard() {
   const thisK=monthKey(now);
   const lastD=new Date();lastD.setMonth(lastD.getMonth()-1);
   const lastK=monthKey(lastD);
+  const prevD=new Date();prevD.setMonth(prevD.getMonth()-2);
+  const prevK=monthKey(prevD);
   const thisRev=(monthMX[thisK]||0)+(monthDH[thisK]||0)+(monthGB[thisK]||0)+(monthCA[thisK]||0)+(monthTF[thisK]||0);
   const lastRev=(monthMX[lastK]||0)+(monthDH[lastK]||0)+(monthGB[lastK]||0)+(monthCA[lastK]||0)+(monthTF[lastK]||0);
-  const growth=lastRev>0?((thisRev-lastRev)/lastRev*100):thisRev>0?100:0;
+  const prevRev=(monthMX[prevK]||0)+(monthDH[prevK]||0)+(monthGB[prevK]||0)+(monthCA[prevK]||0)+(monthTF[prevK]||0);
+  // Si estamos viendo "last month", mostramos lastRev vs prevRev
+  const isLastMonth = period === 'lastmonth';
+  const cardRev  = isLastMonth ? lastRev : thisRev;
+  const cardPrev = isLastMonth ? prevRev : lastRev;
+  const cardLabel = isLastMonth
+    ? lastD.toLocaleDateString('es-MX',{month:'long',year:'numeric'})
+    : now.toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+  const cardTitle = isLastMonth ? 'Last Month' : 'This Month';
+  const growth=cardPrev>0?((cardRev-cardPrev)/cardPrev*100):cardRev>0?100:0;
 
   // ══ KPI CARDS ══
   const sparkHTML = (data, color) => {
@@ -2652,15 +2666,15 @@ function renderDashboard() {
     <div class="card purple"><div style="display:flex;justify-content:space-between"><div class="lbl">DarkHub Members</div></div><div class="val">${fDH.length}</div><div class="sub">Permanent access</div>${sparkHTML(dhMonthly,'#8b5cf6')}</div>
     <div class="card blue" style="border-left-color:#f59e0b"><div class="lbl">Caro Members</div><div class="val">${fCA.length}</div><div class="sub">Permanent access</div>${sparkHTML(caMonthly,'#f59e0b')}</div>
     <div class="card blue" style="border-left-color:#ef4444"><div class="lbl">TonyFans</div><div class="val">${fTF.length}</div><div class="sub">Permanent access</div>${sparkHTML(tfMonthly,'#ef4444')}</div>
-    <div class="card teal"><div style="display:flex;justify-content:space-between"><div class="lbl">This Month</div>${changeHTML(thisRev,lastRev)}</div><div class="val">${csym()}${cx(thisRev).toLocaleString()}</div><div class="sub">${new Date().toLocaleDateString('es-MX',{month:'long',year:'numeric'})}</div>${sparkHTML(gbMonthly.length?gbMonthly:totalMonthly,'#14b8a6')}</div>
+    <div class="card teal"><div style="display:flex;justify-content:space-between"><div class="lbl">${cardTitle}</div>${changeHTML(cardRev,cardPrev)}</div><div class="val">${csym()}${cx(cardRev).toLocaleString()}</div><div class="sub">${cardLabel}</div>${sparkHTML(gbMonthly.length?gbMonthly:totalMonthly,'#14b8a6')}</div>
   `;
 
   // ══ ANALYTICS AREA CHART ══
   const areaData=allMonths.map(k=>(monthMX[k]||0)+(monthDH[k]||0)+(monthGB[k]||0)+(monthCA[k]||0)+(monthTF[k]||0));
   document.getElementById('dash-analytics-total').textContent=csym()+cx(totalAll).toLocaleString();
   const changeEl=document.getElementById('dash-analytics-change');
-  if(growth>=0){changeEl.style.background='rgba(16,185,129,0.12)';changeEl.style.color='#10b981';changeEl.textContent='+'+csym()+cx(thisRev-lastRev).toLocaleString();}
-  else{changeEl.style.background='rgba(239,68,68,0.12)';changeEl.style.color='#ef4444';changeEl.textContent='-'+csym()+cx(Math.abs(thisRev-lastRev)).toLocaleString();}
+  if(growth>=0){changeEl.style.background='rgba(16,185,129,0.12)';changeEl.style.color='#10b981';changeEl.textContent='+'+csym()+cx(cardRev-cardPrev).toLocaleString();}
+  else{changeEl.style.background='rgba(239,68,68,0.12)';changeEl.style.color='#ef4444';changeEl.textContent='-'+csym()+cx(Math.abs(cardRev-cardPrev)).toLocaleString();}
 
   if(window._chartArea) window._chartArea.destroy();
   window._chartArea=new Chart(document.getElementById('chartAreaMes'),{
