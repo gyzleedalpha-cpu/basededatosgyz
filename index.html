@@ -821,6 +821,11 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
       TonyFans
       <span class="sb-badge" id="sb-tonyfans-badge">—</span>
     </button>
+    <button class="sb-item" onclick="switchTab('onlyfans',this)" data-tab="onlyfans">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
+      OnlyFans
+      <span class="sb-badge" id="sb-of-badge">—</span>
+    </button>
     <div class="sb-section-label" style="margin-top:16px">Herramientas</div>
     <button class="sb-item" onclick="switchTab('analisis',this)" data-tab="analisis">
       <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -1166,6 +1171,125 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
 </main>
 </div>
 
+
+<!-- ===== ONLYFANS CUENTAS ===== -->
+<div id="tab-onlyfans" class="tab-content">
+<main>
+
+  <!-- KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px">
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--emerald)" id="of-kpi-disponibles">0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">📦 Disponibles</div>
+    </div>
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--gold2)" id="of-kpi-vendidas">0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">✅ Vendidas</div>
+    </div>
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--text-1)" id="of-kpi-total">0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">📊 Total Cuentas</div>
+    </div>
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--emerald)" id="of-kpi-profit-mes">$0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">💰 Profit Este Mes</div>
+    </div>
+    <div class="panel" style="padding:16px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--gold2)" id="of-kpi-profit-total">$0</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px">💎 Profit Total</div>
+    </div>
+  </div>
+
+  <!-- ── INVENTARIO ── -->
+  <div class="slabel">Inventario de Códigos</div>
+  <div class="panel">
+    <div class="toast" id="toast-of-inv"></div>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+      <div class="field" style="flex:1;min-width:220px">
+        <label>Agregar código(s) — uno por línea para cargar varios a la vez</label>
+        <textarea id="of-codigos-input" rows="3" placeholder="ABC123-XYZ456&#10;DEF789-UVW012&#10;GHI345-RST678" style="width:100%;background:var(--bg-3);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text-1);font-family:monospace;font-size:13px;resize:vertical"></textarea>
+      </div>
+      <button class="btn-primary" style="height:42px;white-space:nowrap" onclick="agregarCodigos()">+ Agregar Códigos</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h3 style="margin:0">Códigos en Inventario</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:12px;color:#aaa" id="of-inv-count"></span>
+      </div>
+    </div>
+    <input class="search-input" type="text" id="of-inv-search" placeholder="Buscar código..." oninput="ofInvPage=1;renderOFInventario(this.value)">
+    <div class="filter-row" id="of-inv-filters">
+      <button class="filter-btn active" onclick="setFilterOFInv('TODOS',this)">Todos</button>
+      <button class="filter-btn" onclick="setFilterOFInv('DISPONIBLE',this)">📦 Disponibles</button>
+      <button class="filter-btn" onclick="setFilterOFInv('VENDIDO',this)">✅ Vendidos</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Código</th><th>Estado</th><th>Comprador</th><th>Fecha Venta</th><th></th></tr></thead>
+      <tbody id="of-inv-tbody"></tbody>
+    </table></div>
+    <div id="of-inv-pager" class="page-bar"></div>
+  </div>
+
+  <!-- ── REGISTRAR VENTA ── -->
+  <div class="slabel" style="margin-top:24px">Registrar Venta</div>
+  <div class="panel">
+    <div class="toast" id="toast-of-venta"></div>
+    <div class="row2">
+      <div class="field"><label>Nombre / @ Telegram del comprador</label>
+        <input type="text" id="of-comprador" placeholder="@usuario o nombre" autocomplete="off">
+      </div>
+      <div class="field"><label>Código a asignar</label>
+        <select id="of-codigo-select" style="font-family:monospace">
+          <option value="">— Selecciona código disponible —</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Precio de venta (USD)</label>
+        <input type="number" id="of-precio" value="8.6" step="0.1">
+      </div>
+      <div class="field"><label>Costo (USD)</label>
+        <input type="number" id="of-costo" value="4.3" step="0.1">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Método de pago</label>
+        <select id="of-metodo">
+          <option>Transferencia MX</option><option>PayPal</option><option>Stripe</option><option>Crypto</option><option>Efectivo</option>
+        </select>
+      </div>
+      <div class="field"><label>Fecha de venta</label>
+        <input type="date" id="of-fecha-venta">
+      </div>
+    </div>
+    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;gap:24px;flex-wrap:wrap">
+      <div><span style="color:var(--text-3);font-size:12px">Precio</span><br><span style="font-weight:700;color:var(--text-1)" id="of-preview-precio">$8.60 USD</span></div>
+      <div><span style="color:var(--text-3);font-size:12px">Costo</span><br><span style="font-weight:700;color:var(--red)" id="of-preview-costo">$4.30 USD</span></div>
+      <div><span style="color:var(--text-3);font-size:12px">Profit</span><br><span style="font-weight:800;color:var(--emerald);font-size:16px" id="of-preview-profit">$4.30 USD</span></div>
+      <div><span style="color:var(--text-3);font-size:12px">En MXN (~17.2)</span><br><span style="font-weight:700;color:var(--gold2)" id="of-preview-mxn">$73.96 MXN profit</span></div>
+    </div>
+    <button class="btn-primary" onclick="registrarVentaOF()">Registrar Venta</button>
+  </div>
+
+  <!-- ── HISTORIAL DE VENTAS ── -->
+  <div class="panel" style="margin-top:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h3 style="margin:0">Historial de Ventas</h3>
+      <span style="font-size:12px;color:#aaa" id="of-ventas-count"></span>
+    </div>
+    <input class="search-input" type="text" id="of-ventas-search" placeholder="Buscar por comprador o código..." oninput="ofVentasPage=1;renderOFVentas(this.value)">
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Comprador</th><th>Código</th><th>Precio</th><th>Costo</th><th style="color:var(--emerald)">Profit</th><th>MXN Profit</th><th>Método</th><th>Fecha</th><th></th></tr></thead>
+      <tbody id="of-ventas-tbody"></tbody>
+    </table></div>
+    <div id="of-ventas-pager" class="page-bar"></div>
+  </div>
+
+</main>
+</div>
 
 <!-- ===== DASHBOARD ===== -->
 <div id="tab-dashboard" class="tab-content active">
@@ -1526,6 +1650,9 @@ let dhData = [];
 let gabitoData = [];
 let caroData = [];
 let tonyfansData = [];
+let ofInventario = [];
+let ofVentas = [];
+let clientes2semanasData = [];
 let clientes2semanasData = [];
 
 let _lsOk = false;
@@ -1542,17 +1669,23 @@ function loadData() {
     const savedCaro = localStorage.getItem('vip_caro');
     const savedTonyfans = localStorage.getItem('vip_tonyfans');
     const savedClientes2 = localStorage.getItem('clientes_2semanas');
+    const savedOFInv     = localStorage.getItem('of_inventario');
+    const savedOFVentas  = localStorage.getItem('of_ventas');
     mxData = savedMX ? JSON.parse(savedMX) : [...HIST_MX];
     dhData = savedDH ? JSON.parse(savedDH) : [...HIST_DH];
     caroData = savedCaro ? JSON.parse(savedCaro) : [...HIST_CARO];
     tonyfansData = savedTonyfans ? JSON.parse(savedTonyfans) : [...HIST_TONYFANS];
-    clientes2semanasData = savedClientes2 ? JSON.parse(savedClientes2) : [...HIST_CLIENTES2SEMANAS];
+    clientes2semanasData = savedClientes2 ? JSON.parse(savedClientes2) : [];
+    ofInventario = savedOFInv    ? JSON.parse(savedOFInv)    : [];
+    ofVentas     = savedOFVentas ? JSON.parse(savedOFVentas) : [];
   } else {
     mxData = [...HIST_MX];
     dhData = [...HIST_DH];
     caroData = [...HIST_CARO];
     tonyfansData = [...HIST_TONYFANS];
-    clientes2semanasData = [...HIST_CLIENTES2SEMANAS];
+    clientes2semanasData = [];
+    ofInventario = [];
+    ofVentas = [];
     setTimeout(showLSWarning, 800);
   }
 }
@@ -1566,11 +1699,13 @@ function saveData() {
       localStorage.setItem('vip_caro', JSON.stringify(caroData));
       localStorage.setItem('vip_tonyfans', JSON.stringify(tonyfansData));
       localStorage.setItem('clientes_2semanas', JSON.stringify(clientes2semanasData));
+      localStorage.setItem('of_inventario', JSON.stringify(ofInventario));
+      localStorage.setItem('of_ventas', JSON.stringify(ofVentas));
     } catch(e) { _lsOk = false; showLSWarning(); }
   } else { showLSWarning(); }
   if (db) {
     setSyncStatus('syncing');
-    Promise.all([db.ref('vip_mx').set(mxData), db.ref('vip_dh').set(dhData), db.ref('vip_gabito').set(gabitoData), db.ref('vip_caro').set(caroData), db.ref('vip_tonyfans').set(tonyfansData), db.ref('clientes_2semanas').set(clientes2semanasData)])
+    Promise.all([db.ref('vip_mx').set(mxData), db.ref('vip_dh').set(dhData), db.ref('vip_gabito').set(gabitoData), db.ref('vip_caro').set(caroData), db.ref('vip_tonyfans').set(tonyfansData), db.ref('clientes_2semanas').set(clientes2semanasData), db.ref('of_inventario').set(ofInventario), db.ref('of_ventas').set(ofVentas)])
       .then(() => setSyncStatus('synced'))
       .catch(() => setSyncStatus('error'));
   }
@@ -2099,6 +2234,180 @@ function renderPager(id, cur, total, setter) {
   h += `<button class="page-btn" ${cur===total?'disabled':''} onclick="${setter}(${cur+1})">›</button>`;
   el.innerHTML = h;
 }
+// ─── ONLYFANS CUENTAS ────────────────────────────────────────────────────────
+let ofInvPage = 1, ofVentasPage = 1, ofInvFilter = 'TODOS';
+const OF_COSTO = 4.3, OF_PRECIO = 8.6, OF_MXN_RATE = 17.2;
+
+function ofProfit(precio, costo) { return Math.round((precio - costo) * 100) / 100; }
+
+function agregarCodigos() {
+  const raw = document.getElementById('of-codigos-input').value.trim();
+  const toast = document.getElementById('toast-of-inv');
+  if (!raw) { toast.textContent = '⚠ Ingresa al menos un código'; toast.style.display='block'; setTimeout(()=>toast.style.display='none',3000); return; }
+  const lineas = raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  let agregados = 0, duplicados = 0;
+  lineas.forEach(cod => {
+    if (ofInventario.find(c=>c.codigo===cod)) { duplicados++; return; }
+    ofInventario.push({ codigo: cod, estado: 'DISPONIBLE', comprador: '', fecha_venta: '', ts: Date.now() });
+    agregados++;
+  });
+  saveData();
+  renderOFInventario();
+  renderOFCodigoSelect();
+  updateOFKPIs();
+  document.getElementById('of-codigos-input').value = '';
+  toast.textContent = `✓ ${agregados} código(s) agregado(s)${duplicados>0?' ('+duplicados+' duplicados omitidos)':''}`;
+  toast.style.background = agregados>0?'#10b981':'#f59e0b';
+  toast.style.display = 'block';
+  setTimeout(()=>toast.style.display='none',3000);
+}
+
+function renderOFCodigoSelect() {
+  const sel = document.getElementById('of-codigo-select');
+  if (!sel) return;
+  const disponibles = ofInventario.filter(c=>c.estado==='DISPONIBLE');
+  sel.innerHTML = '<option value="">— Selecciona código disponible —</option>' +
+    disponibles.map((c,i)=>`<option value="${c.codigo}">${c.codigo}</option>`).join('');
+}
+
+function updateOFPreviews() {
+  const precio = parseFloat(document.getElementById('of-precio')?.value||OF_PRECIO);
+  const costo  = parseFloat(document.getElementById('of-costo')?.value||OF_COSTO);
+  const profit = ofProfit(precio, costo);
+  const profitMXN = Math.round(profit * OF_MXN_RATE * 100)/100;
+  document.getElementById('of-preview-precio').textContent = `$${precio.toFixed(2)} USD`;
+  document.getElementById('of-preview-costo').textContent  = `$${costo.toFixed(2)} USD`;
+  document.getElementById('of-preview-profit').textContent = `$${profit.toFixed(2)} USD`;
+  document.getElementById('of-preview-mxn').textContent    = `$${profitMXN.toFixed(2)} MXN profit`;
+}
+
+function registrarVentaOF() {
+  const comprador = document.getElementById('of-comprador').value.trim();
+  const codigo    = document.getElementById('of-codigo-select').value;
+  const precio    = parseFloat(document.getElementById('of-precio').value) || OF_PRECIO;
+  const costo     = parseFloat(document.getElementById('of-costo').value)  || OF_COSTO;
+  const metodo    = document.getElementById('of-metodo').value;
+  const fecha     = document.getElementById('of-fecha-venta').value;
+  const toast     = document.getElementById('toast-of-venta');
+
+  if (!comprador) { toast.textContent='⚠ Ingresa nombre del comprador'; toast.style.background='#ef4444'; toast.style.display='block'; setTimeout(()=>toast.style.display='none',3000); return; }
+  if (!codigo)    { toast.textContent='⚠ Selecciona un código disponible'; toast.style.background='#ef4444'; toast.style.display='block'; setTimeout(()=>toast.style.display='none',3000); return; }
+  if (!fecha)     { toast.textContent='⚠ Ingresa la fecha de venta'; toast.style.background='#ef4444'; toast.style.display='block'; setTimeout(()=>toast.style.display='none',3000); return; }
+
+  // Marcar código como vendido
+  const inv = ofInventario.find(c=>c.codigo===codigo);
+  if (inv) { inv.estado='VENDIDO'; inv.comprador=comprador; inv.fecha_venta=fecha; }
+
+  // Registrar venta
+  const profit = ofProfit(precio, costo);
+  ofVentas.unshift({ comprador, codigo, precio, costo, profit, metodo, fecha, ts: Date.now() });
+
+  saveData();
+  renderOFInventario();
+  renderOFVentas();
+  renderOFCodigoSelect();
+  updateOFKPIs();
+
+  document.getElementById('of-comprador').value = '';
+  document.getElementById('of-codigo-select').value = '';
+  toast.textContent = `✓ Venta registrada — Profit: $${profit.toFixed(2)} USD ($${(profit*OF_MXN_RATE).toFixed(2)} MXN)`;
+  toast.style.background = '#10b981';
+  toast.style.display = 'block';
+  setTimeout(()=>toast.style.display='none',4000);
+}
+
+function eliminarCodigoOF(idx) {
+  if (!confirm('¿Eliminar este código del inventario?')) return;
+  ofInventario.splice(idx,1);
+  saveData(); renderOFInventario(); renderOFCodigoSelect(); updateOFKPIs();
+}
+
+function eliminarVentaOF(idx) {
+  if (!confirm('¿Eliminar esta venta? El código volverá a estar disponible.')) return;
+  const venta = ofVentas[idx];
+  const inv = ofInventario.find(c=>c.codigo===venta.codigo);
+  if (inv) { inv.estado='DISPONIBLE'; inv.comprador=''; inv.fecha_venta=''; }
+  ofVentas.splice(idx,1);
+  saveData(); renderOFInventario(); renderOFVentas(); renderOFCodigoSelect(); updateOFKPIs();
+}
+
+function setFilterOFInv(f, btn) {
+  ofInvFilter = f; ofInvPage = 1;
+  document.querySelectorAll('#of-inv-filters .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOFInventario();
+}
+
+function updateOFKPIs() {
+  const disponibles = ofInventario.filter(c=>c.estado==='DISPONIBLE').length;
+  const vendidas    = ofInventario.filter(c=>c.estado==='VENDIDO').length;
+  const total       = ofInventario.length;
+  const profitTotal = ofVentas.reduce((s,v)=>s+v.profit,0);
+  const hoy = new Date(); const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+  const profitMes = ofVentas.filter(v=>v.fecha&&v.fecha.startsWith(mesActual)).reduce((s,v)=>s+v.profit,0);
+  document.getElementById('of-kpi-disponibles').textContent = disponibles;
+  document.getElementById('of-kpi-vendidas').textContent    = vendidas;
+  document.getElementById('of-kpi-total').textContent       = total;
+  document.getElementById('of-kpi-profit-mes').textContent  = `$${profitMes.toFixed(2)} USD`;
+  document.getElementById('of-kpi-profit-total').textContent= `$${profitTotal.toFixed(2)} USD`;
+  const badge = document.getElementById('sb-of-badge');
+  if (badge) badge.textContent = disponibles > 0 ? disponibles : '—';
+}
+
+function renderOFInventario(search) {
+  if (search===undefined) search = document.getElementById('of-inv-search')?.value||'';
+  const tbody = document.getElementById('of-inv-tbody');
+  if (!tbody) return;
+  let data = ofInventario.map((c,i)=>({...c,_idx:i}));
+  if (ofInvFilter!=='TODOS') data = data.filter(c=>c.estado===ofInvFilter);
+  if (search) { const q=search.toLowerCase(); data=data.filter(c=>c.codigo.toLowerCase().includes(q)||(c.comprador&&c.comprador.toLowerCase().includes(q))); }
+  document.getElementById('of-inv-count').textContent = `${data.length} códigos`;
+  const totalPages = Math.max(1,Math.ceil(data.length/PAGE_SIZE));
+  if (ofInvPage>totalPages) ofInvPage=totalPages;
+  const pageData = data.slice((ofInvPage-1)*PAGE_SIZE, ofInvPage*PAGE_SIZE);
+  if (pageData.length===0) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px">Sin resultados</td></tr>'; }
+  else {
+    tbody.innerHTML = pageData.map(c=>`<tr>
+      <td style="font-family:monospace;font-size:13px;color:var(--gold2)">${c.codigo}</td>
+      <td><span style="font-size:11px;font-weight:700;color:${c.estado==='DISPONIBLE'?'#10b981':'#6b7280'}">${c.estado==='DISPONIBLE'?'📦 DISPONIBLE':'✅ VENDIDO'}</span></td>
+      <td style="color:var(--text-2)">${c.comprador||'—'}</td>
+      <td style="color:var(--text-2);font-size:12px">${c.fecha_venta||'—'}</td>
+      <td><button onclick="eliminarCodigoOF(${c._idx})" style="font-size:10px;padding:3px 8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:6px;color:#ef4444;cursor:pointer">✕</button></td>
+    </tr>`).join('');
+  }
+  renderPager('of-inv-pager', ofInvPage, totalPages, 'setOFInvPage');
+}
+
+function renderOFVentas(search) {
+  if (search===undefined) search = document.getElementById('of-ventas-search')?.value||'';
+  const tbody = document.getElementById('of-ventas-tbody');
+  if (!tbody) return;
+  let data = ofVentas.map((v,i)=>({...v,_idx:i}));
+  if (search) { const q=search.toLowerCase(); data=data.filter(v=>v.comprador.toLowerCase().includes(q)||v.codigo.toLowerCase().includes(q)); }
+  document.getElementById('of-ventas-count').textContent = `${data.length} ventas`;
+  const totalPages = Math.max(1,Math.ceil(data.length/PAGE_SIZE));
+  if (ofVentasPage>totalPages) ofVentasPage=totalPages;
+  const pageData = data.slice((ofVentasPage-1)*PAGE_SIZE, ofVentasPage*PAGE_SIZE);
+  if (pageData.length===0) { tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#bbb;padding:20px">Sin ventas registradas</td></tr>'; }
+  else {
+    tbody.innerHTML = pageData.map(v=>`<tr>
+      <td style="font-weight:600">${v.comprador}</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--gold2)">${v.codigo}</td>
+      <td style="text-align:right">$${v.precio.toFixed(2)}</td>
+      <td style="text-align:right;color:#ef4444">$${v.costo.toFixed(2)}</td>
+      <td style="text-align:right;font-weight:800;color:#10b981">$${v.profit.toFixed(2)}</td>
+      <td style="text-align:right;color:var(--gold2)">$${(v.profit*OF_MXN_RATE).toFixed(2)}</td>
+      <td style="color:var(--text-2);font-size:12px">${v.metodo}</td>
+      <td style="color:var(--text-2);font-size:12px">${v.fecha||'—'}</td>
+      <td><button onclick="eliminarVentaOF(${v._idx})" style="font-size:10px;padding:3px 8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:6px;color:#ef4444;cursor:pointer">✕</button></td>
+    </tr>`).join('');
+  }
+  renderPager('of-ventas-pager', ofVentasPage, totalPages, 'setOFVentasPage');
+}
+
+function setOFInvPage(p)    { ofInvPage=p;    renderOFInventario(); }
+function setOFVentasPage(p) { ofVentasPage=p; renderOFVentas(); }
+
 // ─── FILTER STATE ────────────────────────────────────────────────────────────
 let mxFilter = 'TODOS';
 function setFilter(grp, f, btn) {
@@ -2922,7 +3231,7 @@ function importarTonyfans(input) {
 function resetTodo() {
   if (!confirm('¿Borrar TODOS los datos? Se perderán los registros nuevos. Los datos históricos se recargarán.')) return;
   localStorage.removeItem('vip_mx'); localStorage.removeItem('vip_dh'); localStorage.removeItem('vip_gabito'); localStorage.removeItem('vip_caro'); localStorage.removeItem('vip_tonyfans'); localStorage.removeItem('clientes_2semanas');
-  loadData(); updateHeader(); renderMXTable(); renderDHTable(); renderCaroTable(); renderTonyfansTable(); renderSegTable(); renderMemStats();
+  loadData(); updateHeader(); renderMXTable(); renderDHTable(); renderCaroTable(); renderTonyfansTable(); renderSegTable(); renderOFInventario(); renderOFVentas(); updateOFKPIs(); renderMemStats();
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
@@ -2933,6 +3242,13 @@ renderMXTable();
 renderCaroTable();
 renderTonyfansTable();
 renderSegTable();
+renderOFInventario();
+renderOFVentas();
+updateOFKPIs();
+renderOFCodigoSelect();
+// Listeners para preview profit en tiempo real
+document.getElementById('of-precio')?.addEventListener('input', updateOFPreviews);
+document.getElementById('of-costo')?.addEventListener('input', updateOFPreviews);
 renderDashboard();
 
 // Set today as default date
