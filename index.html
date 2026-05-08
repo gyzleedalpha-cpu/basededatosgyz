@@ -1649,6 +1649,43 @@ function initFirebase() {
       }
       setSyncStatus('synced');
     });
+
+    db.ref('clientes_2semanas').on('value', snap => {
+      const val = snap.val();
+      if (val && Array.isArray(val)) {
+        clientes2semanasData = val;
+        if (_lsOk) try { localStorage.setItem('clientes_2semanas', JSON.stringify(clientes2semanasData)); } catch(e){}
+        renderSegTable();
+      } else if (val === null && clientes2semanasData.length > 0) {
+        db.ref('clientes_2semanas').set(clientes2semanasData);
+      }
+      setSyncStatus('synced');
+    });
+
+    db.ref('of_inventario').on('value', snap => {
+      const val = snap.val();
+      if (val && Array.isArray(val)) {
+        ofInventario = val;
+        if (_lsOk) try { localStorage.setItem('of_inventario', JSON.stringify(ofInventario)); } catch(e){}
+        renderOFInventario(); renderOFCodigoSelect(); updateOFKPIs();
+      } else if (val === null && ofInventario.length > 0) {
+        db.ref('of_inventario').set(ofInventario);
+      }
+      setSyncStatus('synced');
+    });
+
+    db.ref('of_ventas').on('value', snap => {
+      const val = snap.val();
+      if (val && Array.isArray(val)) {
+        ofVentas = val;
+        if (_lsOk) try { localStorage.setItem('of_ventas', JSON.stringify(ofVentas)); } catch(e){}
+        renderOFVentas(); updateOFKPIs();
+      } else if (val === null && ofVentas.length > 0) {
+        db.ref('of_ventas').set(ofVentas);
+      }
+      setSyncStatus('synced');
+    });
+
   } catch(e) { console.warn('Firebase:', e); db = null; setSyncStatus('error'); }
 }
 // ─── DATA ───────────────────────────────────────────────────────────────────
