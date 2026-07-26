@@ -1477,6 +1477,27 @@ function calcFechasMX() {
 }
 
 // ─── REGISTRO MX ────────────────────────────────────────────────────────────
+// ─── REGISTRO CENTRAL DE VENTAS ─────────────────────────────────────────────
+// Toda venta (de cualquier fuente: esta app, botventas, bot OnlyHit) se
+// duplica a la rama `ventas` — la fuente única de verdad para dashboards.
+function registrarVentaCentral(rec) {
+  if (!db) return; // sin Firebase no hay registro central; la venta local no se bloquea
+  try {
+    db.ref('ventas').push({
+      fecha_iso: new Date().toISOString().slice(0,19) + '+00:00',
+      origen: 'vip_manager',
+      producto: rec.grupo + (rec.plan && rec.plan !== 'Permanente' ? ' — ' + rec.plan : rec.plan === 'Permanente' ? ' — Permanente' : ''),
+      product_id: rec.grupo,
+      plan_id: rec.plan || '',
+      monto_mxn: rec.monto || 0,
+      metodo: rec.metodo || '',
+      cliente_id: rec.id || '',
+      cliente_username: '',
+      cliente_nombre: rec.nombre || ''
+    });
+  } catch(e) { console.warn('Registro central:', e); }
+}
+
 function registrarMX() {
   const nombre = document.getElementById('mx-nombre').value.trim();
   const id = document.getElementById('mx-id').value.trim();
@@ -1497,6 +1518,7 @@ function registrarMX() {
   const rec = { grupo:'MX VIP', nombre, id, plan, fechas, entrada, salida, monto: parseFloat(monto), metodo, tipoPrecio, status: plan === 'Permanente' ? 'PERMANENTE' : 'ACTIVO', historico: false, ts: new Date().toISOString() };
   mxData.push(rec);
   saveData();
+  registrarVentaCentral(rec);
   toast('toast-mx', 'Guardado en MX VIP');
   document.getElementById('mx-nombre').value = '';
   document.getElementById('mx-id').value = '';
@@ -1522,6 +1544,7 @@ function registrarDH() {
   const rec = { grupo:'DarkHub', nombre, id, plan:'Permanente', fechas:'Permanente', entrada: dhEntVal, salida:'Permanente', monto: parseFloat(monto), metodo, tipoPrecio, status:'PERMANENTE', historico: false, ts: new Date().toISOString() };
   dhData.push(rec);
   saveData();
+  registrarVentaCentral(rec);
   toast('toast-dh', 'Guardado en DarkHub');
   document.getElementById('dh-nombre').value = '';
   document.getElementById('dh-id').value = '';
@@ -1543,6 +1566,7 @@ function registrarCaro() {
   const rec = { grupo:'Caro', nombre, id, plan:'Permanente', fechas:'Permanente', entrada: caroEntVal, salida:'Permanente', monto: parseFloat(monto), metodo, status:'PERMANENTE', historico: false, ts: new Date().toISOString() };
   caroData.push(rec);
   saveData();
+  registrarVentaCentral(rec);
   toast('toast-caro', 'Guardado en Caro');
   document.getElementById('caro-nombre').value = '';
   document.getElementById('caro-id').value = '';
