@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 /* ── Animations ── */
@@ -532,7 +533,7 @@ td.muted{color:var(--text-3);font-size:11px}
   opacity:0;
   box-shadow:0 0 8px rgba(139,92,246,0.8);
 }
-body>*:not(.bg-orbs):not(#cursor-glow):not(#cursor-dot){position:relative;z-index:10}
+body>*:not(.bg-orbs):not(#cursor-glow):not(#cursor-dot):not(#lock-screen){position:relative;z-index:10}
 
 /* ══════════════════════════════════════
    SIDEBAR LAYOUT
@@ -775,6 +776,43 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
 </style>
 </head>
 <body>
+<!-- ═══ CANDADO: la app no se muestra hasta iniciar sesión ═══ -->
+<style>
+  #lock-screen{position:fixed;inset:0;z-index:99999;background:#06060f;
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  #lock-screen.oculto{display:none}
+  .lock-card{background:#0e0d1c;border:1px solid rgba(255,255,255,.08);border-radius:18px;
+    padding:34px 30px;width:100%;max-width:360px;text-align:center;
+    font-family:'Inter',system-ui,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .lock-card .logo{width:52px;height:52px;border-radius:14px;background:#6366f1;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;
+    margin:0 auto 16px}
+  .lock-card h2{color:#eeedf8;font-size:19px;font-weight:700;margin-bottom:6px}
+  .lock-card p{color:#5b5a78;font-size:12.5px;margin-bottom:22px}
+  .lock-card input{width:100%;padding:13px 15px;border-radius:10px;font-size:15px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#eeedf8;
+    outline:none;transition:.15s;font-family:inherit}
+  .lock-card input:focus{border-color:#6366f1;background:rgba(99,102,241,.07)}
+  .lock-card button{width:100%;margin-top:12px;padding:13px;border-radius:10px;border:none;
+    background:#6366f1;color:#fff;font-size:14.5px;font-weight:600;cursor:pointer;
+    font-family:inherit;transition:.15s}
+  .lock-card button:hover{background:#818cf8}
+  .lock-card button:disabled{opacity:.55;cursor:default}
+  #lock-error{color:#f87171;font-size:12.5px;margin-top:12px;min-height:16px}
+  #lock-hint{color:#3e3d5a;font-size:11px;margin-top:16px;line-height:1.5}
+</style>
+<div id="lock-screen">
+  <div class="lock-card">
+    <div class="logo">V</div>
+    <h2>VIP Manager</h2>
+    <p>Escribe tu contraseña para entrar</p>
+    <input type="password" id="lock-pass" placeholder="Contraseña" autocomplete="current-password">
+    <button id="lock-btn">Entrar</button>
+    <div id="lock-error"></div>
+    <div id="lock-hint">Solo se pide una vez por dispositivo.</div>
+  </div>
+</div>
+
 <div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
 <div id="cursor-glow"></div>
 <div id="cursor-dot"></div>
@@ -822,7 +860,10 @@ main{max-width:1200px;margin:0 auto;padding:28px 28px}
     </button>
   </nav>
   <div class="sb-footer">
-    <div class="sync-ind"><span class="sdot" id="sync-dot"></span><span id="sync-text">Local</span></div>
+    <div class="sync-ind"><span class="sdot" id="sync-dot"></span><span id="sync-text">Local</span>
+      <button onclick="cerrarSesion()" title="Cerrar sesión en este dispositivo"
+        style="margin-left:auto;background:none;border:none;color:#3e3d5a;cursor:pointer;font-size:11px;font-family:inherit;padding:2px 4px">Salir</button>
+    </div>
     <span id="hDate" style="font-size:10px;color:var(--text-3)"></span>
   </div>
 </aside>
@@ -1264,10 +1305,54 @@ function setSyncStatus(state) {
   const labels = { syncing:'Sincronizando…', synced:'Sincronizado ✓', error:'Error sync' };
   txt.textContent = labels[state] || 'Local';
 }
+// ─── CANDADO / SESIÓN ───────────────────────────────────────────────────────
+// La app solo se conecta a la base después de iniciar sesión. La sesión queda
+// guardada en el dispositivo (no se pide la contraseña en cada visita).
+const CUENTA_EMAIL = 'sol@vipmanager.app';   // usuario fijo; solo se pide la clave
+
+function initSesion() {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const pantalla = document.getElementById('lock-screen');
+  const input = document.getElementById('lock-pass');
+  const boton = document.getElementById('lock-btn');
+  const error = document.getElementById('lock-error');
+
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      pantalla.classList.add('oculto');
+      if (!db) initFirebase();          // conectar a la base ya autenticado
+    } else {
+      pantalla.classList.remove('oculto');
+      setTimeout(() => input.focus(), 100);
+    }
+  });
+
+  const entrar = () => {
+    const clave = input.value;
+    if (!clave) { error.textContent = 'Escribe tu contraseña'; return; }
+    boton.disabled = true; boton.textContent = 'Entrando…'; error.textContent = '';
+    firebase.auth().signInWithEmailAndPassword(CUENTA_EMAIL, clave)
+      .catch(e => {
+        const msg = (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential')
+          ? 'Contraseña incorrecta' : 'No se pudo entrar: ' + (e.code || e.message);
+        error.textContent = msg;
+        input.value = ''; input.focus();
+      })
+      .finally(() => { boton.disabled = false; boton.textContent = 'Entrar'; });
+  };
+  boton.addEventListener('click', entrar);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') entrar(); });
+}
+
+function cerrarSesion() {
+  if (confirm('¿Cerrar sesión en este dispositivo?')) firebase.auth().signOut().then(() => location.reload());
+}
+
 function initFirebase() {
   if (!FIREBASE_CONFIG) return;
   try {
-    firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.database();
     setSyncStatus('syncing');
     db.ref('vip_mx').on('value', snap => {
@@ -2419,7 +2504,7 @@ function resetTodo() {
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 loadData();
-initFirebase();
+initSesion();   // pide contraseña; al entrar llama a initFirebase()
 updateHeader();
 renderMXTable();
 renderCaroTable();
