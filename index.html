@@ -1114,6 +1114,20 @@ td.muted,.muted{color:var(--text-2)}
       <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
       Importar / Exportar
     </button>
+    <div class="sb-section-label" style="margin-top:16px">Contenido</div>
+    <button class="sb-item" onclick="switchTab('canales',this)" data-tab="canales">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21.5 2.5 2.5 10.2l6.1 2.3 2.3 6.1 10.6-16.1z"/><path d="M8.6 12.5 21.5 2.5"/></svg>
+      Canales
+      <span class="sb-badge" id="sb-op-badge">—</span>
+    </button>
+    <button class="sb-item" onclick="switchTab('cuentasx',this)" data-tab="cuentasx">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 2h3l-7.5 8.6L22 22h-6.9l-5.4-7-6.2 7H.5l8-9.2L2 2h7l4.9 6.4L18 2z"/></svg>
+      Cuentas de X
+    </button>
+    <button class="sb-item" onclick="switchTab('ideas',this)" data-tab="ideas">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+      Ideas
+    </button>
   </nav>
   <div class="sb-footer">
     <div class="sync-ind"><span class="sdot" id="sync-dot"></span><span id="sync-text">Local</span>
@@ -1717,6 +1731,180 @@ td.muted,.muted{color:var(--text-2)}
 </main>
 </div>
 
+<!-- ===== CANALES DE TELEGRAM ===== -->
+<div id="tab-canales" class="tab-content">
+<main>
+  <div class="page-head">
+    <div><h2>Canales de Telegram</h2><p id="can-sub">Hasta cuándo tienes contenido programado en cada canal</p></div>
+    <button class="btn-sm" onclick="opAbrirForm('canal')">+ Nuevo canal</button>
+  </div>
+
+  <div id="can-avisos"></div>
+
+  <div class="panel" id="can-form" style="display:none">
+    <div class="toast" id="toast-can"></div>
+    <h3 id="can-form-titulo">Nuevo canal</h3>
+    <input type="hidden" id="can-key">
+    <div class="row2">
+      <div class="field"><label>Nombre del canal</label><input type="text" id="can-nombre" placeholder="MX VIP" autocomplete="off"></div>
+      <div class="field"><label>Enlace o @usuario <span style="opacity:.5">(opcional)</span></label><input type="text" id="can-url" placeholder="t.me/micanal" autocomplete="off"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Contenido programado hasta</label>
+        <input type="date" id="can-hasta" oninput="opPreview('can')">
+        <div class="date-preview" id="can-preview"></div>
+      </div>
+      <div class="field"><label>Avisarme con</label>
+        <select id="can-aviso">
+          <option value="3">3 días de antelación</option>
+          <option value="5">5 días de antelación</option>
+          <option value="7" selected>7 días de antelación</option>
+          <option value="14">14 días de antelación</option>
+          <option value="30">30 días de antelación</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Notas <span style="opacity:.5">(opcional)</span></label><input type="text" id="can-notas" placeholder="Qué se publica, cada cuánto…" autocomplete="off"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="opGuardarCanal()">Guardar canal</button>
+      <button class="btn-sm" onclick="opCerrarForm('canal')">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h3 style="margin:0">Tus canales</h3>
+      <span style="font-size:12px;color:#aaa" id="can-count"></span>
+    </div>
+    <div id="can-lista"></div>
+  </div>
+</main>
+</div>
+
+<!-- ===== IDEAS ===== -->
+<div id="tab-ideas" class="tab-content">
+<main>
+  <div class="page-head">
+    <div><h2>Ideas</h2><p id="idea-sub">Lo que quieres construir, con fechas y dependencias</p></div>
+    <button class="btn-sm" onclick="opAbrirForm('idea')">+ Nueva idea</button>
+  </div>
+
+  <div class="cards" id="idea-cards"></div>
+
+  <div class="panel" id="idea-form" style="display:none;margin-top:16px">
+    <div class="toast" id="toast-idea"></div>
+    <h3 id="idea-form-titulo">Nueva idea</h3>
+    <input type="hidden" id="idea-key">
+    <div class="field"><label>Idea</label><input type="text" id="idea-titulo" placeholder="Atribución por cuenta de X" autocomplete="off"></div>
+    <div class="field"><label>Detalle <span style="opacity:.5">(opcional)</span></label><input type="text" id="idea-detalle" placeholder="Qué problema resuelve, cómo se haría…" autocomplete="off"></div>
+    <div class="row2">
+      <div class="field"><label>Estado</label>
+        <select id="idea-estado">
+          <option value="idea">💡 Idea suelta</option>
+          <option value="siguiente">🎯 Siguiente</option>
+          <option value="haciendo">🔨 Haciéndose</option>
+          <option value="hecha">✅ Cumplida</option>
+          <option value="descartada">🗑️ Descartada</option>
+        </select>
+      </div>
+      <div class="field"><label>Importancia</label>
+        <select id="idea-prioridad">
+          <option value="3">🔴 Alta</option>
+          <option value="2" selected>🟡 Media</option>
+          <option value="1">⚪ Baja</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Fecha objetivo <span style="opacity:.5">(opcional)</span></label>
+        <input type="date" id="idea-fecha" oninput="opPreview('idea')">
+        <div class="date-preview" id="idea-preview"></div>
+      </div>
+      <div class="field"><label>Depende de <span style="opacity:.5">(opcional)</span></label>
+        <select id="idea-depende"><option value="">— nada —</option></select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="opGuardarIdea()">Guardar idea</button>
+      <button class="btn-sm" onclick="opCerrarForm('idea')">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h3 style="margin:0">Roadmap</h3>
+      <div class="filter-row" id="idea-filtros"></div>
+    </div>
+    <div id="idea-lista"></div>
+  </div>
+</main>
+</div>
+
+<!-- ===== CUENTAS DE X ===== -->
+<div id="tab-cuentasx" class="tab-content">
+<main>
+  <div class="page-head">
+    <div><h2>Cuentas de X</h2><p id="cx-sub">Las mismas que usa el bot de contenido — se edita en un solo sitio</p></div>
+    <button class="btn-sm" onclick="opAbrirForm('cx')">+ Nueva cuenta</button>
+  </div>
+
+  <div id="cx-avisos"></div>
+  <div class="cards" id="cx-cards"></div>
+
+  <div class="panel" id="cx-form" style="display:none;margin-top:16px">
+    <div class="toast" id="toast-cx"></div>
+    <h3 id="cx-form-titulo">Nueva cuenta</h3>
+    <input type="hidden" id="cx-key">
+    <div class="row2">
+      <div class="field"><label>Cuenta (sin @)</label><input type="text" id="cx-nombre" placeholder="paradisehub" autocomplete="off"></div>
+      <div class="field"><label>Seguidores</label><input type="number" id="cx-seguidores" placeholder="30000"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Función</label>
+        <select id="cx-funcion">
+          <option value="motor">🔥 Motor — alcance, no publica ofertas</option>
+          <option value="nicho" selected>🎯 Nicho — audiencia temática</option>
+          <option value="producto">📦 Producto — su contenido es el producto</option>
+        </select>
+      </div>
+      <div class="field"><label>Categoría en el hub</label><input type="text" id="cx-categoria" placeholder="SexMex" autocomplete="off"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Qué vende</label><input type="text" id="cx-producto" placeholder="BlackHub" autocomplete="off"></div>
+      <div class="field"><label>Vertical</label><input type="text" id="cx-vertical" placeholder="SexMex — videos completos" autocomplete="off"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Contenido programado hasta</label>
+        <input type="date" id="cx-hasta" oninput="opPreview('cx')">
+        <div class="date-preview" id="cx-preview"></div>
+      </div>
+      <div class="field"><label>Avisarme con</label>
+        <select id="cx-aviso">
+          <option value="3">3 días de antelación</option>
+          <option value="5">5 días de antelación</option>
+          <option value="7" selected>7 días de antelación</option>
+          <option value="14">14 días de antelación</option>
+          <option value="30">30 días de antelación</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="opGuardarCuentaX()">Guardar cuenta</button>
+      <button class="btn-sm" onclick="opCerrarForm('cx')">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h3 style="margin:0">Tu red</h3>
+      <span style="font-size:12px;color:#aaa" id="cx-count"></span>
+    </div>
+    <div id="cx-lista"></div>
+  </div>
+</main>
+</div>
+
+
 <script>
 // ─── FIREBASE CONFIG ────────────────────────────────────────────────────────
 // Para sincronización entre dispositivos (cel / Mac / Windows):
@@ -1844,6 +2032,31 @@ function initFirebase() {
     });
 
 
+
+    // ── Operación: canales, ideas y cuentas de X ──
+    // Ramas HERMANAS de vip_*, nunca anidadas dentro: saveData() hace
+    // .set(array) sobre vip_* en cada guardado y se llevaría por delante
+    // cualquier cosa colgada ahí. Y van aquí, no en el bloque INIT, porque
+    // ahí `db` todavía es null: onAuthStateChanged es asíncrono.
+    db.ref('_canales').on('value', snap => {
+      canalesData = snap.val() || {};
+      if (typeof renderCanales === 'function') renderCanales();
+      if (typeof opActualizarBadges === 'function') opActualizarBadges();
+    }, err => console.warn('_canales:', err));
+
+    db.ref('_ideas').on('value', snap => {
+      ideasData = snap.val() || {};
+      if (typeof renderIdeas === 'function') renderIdeas();
+      if (typeof opLlenarDepende === 'function') opLlenarDepende(null);
+    }, err => console.warn('_ideas:', err));
+
+    // Compartida con el bot de contenido: una sola fuente de verdad.
+    db.ref('_contenido/cuentas').on('value', snap => {
+      cuentasXData = snap.val() || {};
+      if (typeof renderCuentasX === 'function') renderCuentasX();
+      if (typeof opActualizarBadges === 'function') opActualizarBadges();
+    }, err => console.warn('_contenido/cuentas:', err));
+
   } catch(e) { console.warn('Firebase:', e); db = null; setSyncStatus('error'); }
 }
 // ─── DATA ───────────────────────────────────────────────────────────────────
@@ -1963,6 +2176,9 @@ function switchTab(name, btn) {
   if (name === 'renovaciones') renderRenovaciones();
   if (name === 'suscriptores') { _susPage = 1; renderSuscriptores(); }
   if (name === 'ingresos') renderIngresos();
+  if (name === 'canales') renderCanales();
+  if (name === 'ideas') { opLlenarDepende(null); renderIdeas(); }
+  if (name === 'cuentasx') renderCuentasX();
   if (name === 'calendario') renderCalendario();
   if (name === 'recordatorios') renderRecordatorios();
 }
@@ -3645,6 +3861,505 @@ calcFechasMX();
     });
   });
 })();
+
+// ══════════════════════════════════════════════════════════════════════════
+//  OPERACIÓN — Canales de Telegram · Ideas · Cuentas de X
+//
+//  Reglas que sigue este bloque, y por qué:
+//
+//  · Ramas HERMANAS (_canales, _ideas) y nunca anidadas bajo vip_*.
+//    saveData() hace .set(array) sobre las 4 ramas vip_* en CADA guardado:
+//    cualquier cosa colgada ahí dentro desaparecería en la siguiente alta.
+//
+//  · Claves push, nunca arrays con índice. Firebase solo devuelve Array si
+//    las claves son 0..n consecutivas; borrar una del medio deja un hueco y
+//    la lectura pasa a ser objeto — el fallo silencioso que ya costó caro
+//    en este proyecto.
+//
+//  · Los listeners se registran dentro de initFirebase(), no en el bloque
+//    INIT: ahí `db` todavía vale null porque onAuthStateChanged es asíncrono.
+//
+//  · Todo texto del usuario pasa por escHtml() antes de tocar innerHTML.
+//    El resto del archivo no escapa nada; aquí sí, porque estos títulos los
+//    escribes tú a mano y un "<" suelto rompía el render.
+//
+//  · Cada escritura lleva .catch() y avisa con toast(). Un fallo por reglas
+//    de Firebase es mudo en este código si no se captura.
+// ══════════════════════════════════════════════════════════════════════════
+
+let canalesData = {};   // { pushKey: {nombre,url,hasta,aviso,notas,creado} }
+let ideasData   = {};   // { pushKey: {titulo,detalle,estado,prioridad,fecha,depende,creado,hechaEn} }
+let cuentasXData = {};  // { handle: {...} }  ← rama compartida con el bot
+
+// ─── ESCAPE ───────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// ─── FECHAS ───────────────────────────────────────────────────────────────
+// new Date('2026-08-10') se interpreta en UTC y en México cae un día antes.
+// Por eso se parsea a mano en hora local.
+function opFecha(iso) {
+  if (!iso || typeof iso !== 'string') return null;
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return null;
+  const d = new Date(+m[1], +m[2] - 1, +m[3]);
+  // El regex solo valida el formato: new Date(2026,1,31) devuelve el 3 de
+  // marzo sin quejarse. Sin esta comprobación, un 2026-02-31 daría una
+  // cuenta de días equivocada y en silencio.
+  if (d.getFullYear() !== +m[1] || d.getMonth() !== +m[2] - 1 || d.getDate() !== +m[3]) return null;
+  return isNaN(d.getTime()) ? null : d;
+}
+function opHoy() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+function opDias(iso) {
+  const d = opFecha(iso);
+  return d === null ? null : Math.round((d - opHoy()) / 86400000);
+}
+function opFechaTxt(iso) {
+  const d = opFecha(iso);
+  return d ? d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+}
+function opPreview(pre) {
+  const inp = document.getElementById(pre + '-hasta') || document.getElementById(pre + '-fecha');
+  const out = document.getElementById(pre + '-preview');
+  if (!inp || !out) return;
+  const n = opDias(inp.value);
+  if (n === null) { out.textContent = ''; return; }
+  const d = Math.abs(n), pl = d === 1 ? 'día' : 'días';
+  out.textContent = n < 0 ? `Hace ${d} ${pl}` : n === 0 ? 'Hoy' : `Faltan ${d} ${pl}`;
+}
+
+// ─── GOOGLE CALENDAR ──────────────────────────────────────────────────────
+// Esta página es estática en GitHub Pages: no hay backend donde guardar un
+// token de OAuth, así que la API de Calendar queda descartada. El enlace de
+// plantilla abre Google Calendar con el evento ya relleno y tú confirmas con
+// un clic — sin credenciales y sin que nada escriba en tu calendario solo.
+function opGcal(titulo, detalle, iso) {
+  const d = opFecha(iso);
+  if (!d) return '#';
+  const f = x => `${x.getFullYear()}${String(x.getMonth() + 1).padStart(2, '0')}${String(x.getDate()).padStart(2, '0')}`;
+  // Evento de día completo: Google exige que el fin sea el día siguiente.
+  const sig = new Date(d.getTime() + 86400000);
+  return 'https://calendar.google.com/calendar/render?' + new URLSearchParams({
+    action: 'TEMPLATE', text: titulo, details: detalle || '', dates: `${f(d)}/${f(sig)}`,
+  }).toString();
+}
+
+// ─── AVISOS ───────────────────────────────────────────────────────────────
+// Devuelve todo lo que se queda sin contenido dentro de su ventana de aviso.
+function opAvisos() {
+  const out = [];
+  Object.entries(canalesData || {}).forEach(([k, c]) => {
+    if (!c || !c.hasta) return;
+    const n = opDias(c.hasta);
+    if (n !== null && n <= (+c.aviso || 7)) out.push({ tipo: 'canal', k, nombre: c.nombre, dias: n, hasta: c.hasta });
+  });
+  Object.entries(cuentasXData || {}).forEach(([k, c]) => {
+    if (!c || !c.programado_hasta) return;
+    const n = opDias(c.programado_hasta);
+    if (n !== null && n <= (+c.aviso_dias || 7)) out.push({ tipo: 'cuenta', k, nombre: '@' + k, dias: n, hasta: c.programado_hasta });
+  });
+  return out.sort((a, b) => a.dias - b.dias);
+}
+
+function opPintaAvisos(destino, tipo) {
+  const el = document.getElementById(destino);
+  if (!el) return;
+  const av = opAvisos().filter(a => !tipo || a.tipo === tipo);
+  if (!av.length) { el.innerHTML = ''; return; }
+  el.innerHTML = av.map(a => {
+    const urgente = a.dias <= 0;
+    const d = Math.abs(a.dias), plural = d === 1 ? 'día' : 'días';
+    const txt = a.dias < 0 ? `se acabó hace ${d} ${plural}`
+              : a.dias === 0 ? 'se acaba HOY'
+              : `se acaba en ${d} ${plural}`;
+    return `<div class="panel" style="margin-bottom:12px;border-color:${urgente ? 'rgba(239,68,68,.45)' : 'rgba(245,158,11,.4)'};background:${urgente ? 'rgba(239,68,68,.06)' : 'rgba(245,158,11,.05)'}">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:18px">${urgente ? '🔴' : '🟠'}</span>
+        <strong>${escHtml(a.nombre)}</strong>
+        <span style="color:#aaa">— ${txt}</span>
+        <a class="btn-sm" style="margin-left:auto;text-decoration:none"
+           href="${opGcal('Programar contenido: ' + a.nombre, 'Se acaba el contenido programado.', a.hasta)}"
+           target="_blank" rel="noopener" title="Crea el evento; usa el recordatorio por omisión de tu calendario">📅 Añadir a Google Calendar</a>
+      </div></div>`;
+  }).join('');
+}
+
+// ─── FORMULARIOS ──────────────────────────────────────────────────────────
+function opAbrirForm(tipo) {
+  const p = { canal: 'can', idea: 'idea', cx: 'cx' }[tipo];
+  const f = document.getElementById(p + '-form');
+  if (!f) return;
+  f.style.display = '';
+  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function opCerrarForm(tipo) {
+  const p = { canal: 'can', idea: 'idea', cx: 'cx' }[tipo];
+  const f = document.getElementById(p + '-form');
+  if (!f) return;
+  f.style.display = 'none';
+  f.querySelectorAll('input').forEach(i => { if (i.type !== 'hidden') i.value = ''; });
+  const key = document.getElementById(p + '-key'); if (key) key.value = '';
+  const t = document.getElementById(p + '-form-titulo');
+  if (t) t.textContent = { can: 'Nuevo canal', idea: 'Nueva idea', cx: 'Nueva cuenta' }[p];
+  const pv = document.getElementById(p + '-preview'); if (pv) pv.textContent = '';
+}
+
+function opEscribir(ruta, valor, toastId, msgOk) {
+  if (!db) { toast(toastId, 'Sin conexión — entra de nuevo'); return Promise.reject(); }
+  return db.ref(ruta).set(valor)
+    .then(() => toast(toastId, msgOk))
+    .catch(e => { toast(toastId, 'No se pudo guardar: ' + (e && e.code ? e.code : 'error')); throw e; });
+}
+
+// ─── CANALES ──────────────────────────────────────────────────────────────
+function opGuardarCanal() {
+  const nombre = (document.getElementById('can-nombre').value || '').trim();
+  if (!nombre) { toast('toast-can', 'Ponle nombre al canal'); return; }
+  const key = document.getElementById('can-key').value || (db ? db.ref('_canales').push().key : String(Date.now()));
+  const reg = {
+    nombre,
+    url: (document.getElementById('can-url').value || '').trim(),
+    hasta: document.getElementById('can-hasta').value || '',
+    aviso: +document.getElementById('can-aviso').value || 7,
+    notas: (document.getElementById('can-notas').value || '').trim(),
+    creado: (canalesData[key] && canalesData[key].creado) || new Date().toISOString(),
+  };
+  opEscribir('_canales/' + key, reg, 'toast-can', 'Canal guardado')
+    .then(() => opCerrarForm('canal')).catch(() => {});
+}
+
+function opEditarCanal(key) {
+  const c = canalesData[key]; if (!c) return;
+  document.getElementById('can-key').value = key;
+  document.getElementById('can-nombre').value = c.nombre || '';
+  document.getElementById('can-url').value = c.url || '';
+  document.getElementById('can-hasta').value = c.hasta || '';
+  document.getElementById('can-aviso').value = c.aviso || 7;
+  document.getElementById('can-notas').value = c.notas || '';
+  document.getElementById('can-form-titulo').textContent = 'Editar canal';
+  opAbrirForm('canal'); opPreview('can');
+}
+
+function opBorrarCanal(key) {
+  const c = canalesData[key]; if (!c) return;
+  if (!confirm(`¿Quitar el canal "${c.nombre}"?`)) return;
+  if (!db) { toast('toast-can', 'Sin conexión'); return; }
+  db.ref('_canales/' + key).remove()
+    .then(() => toast('toast-can', 'Canal quitado'))
+    .catch(() => toast('toast-can', 'No se pudo quitar'));
+}
+
+function renderCanales() {
+  opPintaAvisos('can-avisos', 'canal');
+  const cont = document.getElementById('can-lista'); if (!cont) return;
+  const ent = Object.entries(canalesData || {});
+  document.getElementById('can-count').textContent = ent.length ? `${ent.length} canal${ent.length === 1 ? '' : 'es'}` : '';
+  if (!ent.length) {
+    cont.innerHTML = `<div class="empty">Aún no has añadido ningún canal.<br><span style="opacity:.6">Usa “+ Nuevo canal” para registrar hasta cuándo tienes contenido programado.</span></div>`;
+    return;
+  }
+  ent.sort((a, b) => {
+    const da = opDias(a[1].hasta), dbb = opDias(b[1].hasta);
+    if (da === null) return 1; if (dbb === null) return -1;
+    return da - dbb;
+  });
+  cont.innerHTML = `<div class="tbl-wrap"><table><thead><tr>
+      <th>Canal</th><th>Contenido hasta</th><th>Quedan</th><th>Aviso</th><th>Notas</th><th></th>
+    </tr></thead><tbody>` + ent.map(([k, c]) => {
+    const n = opDias(c.hasta);
+    const color = n === null ? '#6b7280' : n < 0 ? '#ef4444' : n <= (+c.aviso || 7) ? '#f59e0b' : '#10b981';
+    const txt = n === null ? '—' : n < 0 ? `hace ${Math.abs(n)}d` : n === 0 ? 'hoy' : `${n} día${n === 1 ? '' : 's'}`;
+    return `<tr>
+      <td><strong>${escHtml(c.nombre)}</strong>${c.url ? `<br><span style="font-size:11px;color:#6b7280">${escHtml(c.url)}</span>` : ''}</td>
+      <td>${opFechaTxt(c.hasta)}</td>
+      <td><span style="color:${color};font-weight:600">${txt}</span></td>
+      <td style="color:#6b7280">${c.aviso || 7}d antes</td>
+      <td style="color:#9ca3af;font-size:12px">${escHtml(c.notas || '')}</td>
+      <td style="text-align:right;white-space:nowrap">
+        ${c.hasta ? `<a class="btn-sm" style="text-decoration:none" target="_blank" rel="noopener" href="${opGcal('Programar contenido: ' + c.nombre, c.notas || '', c.hasta)}">📅</a>` : ''}
+        <button class="btn-sm" data-op="editarCanal" data-k="${escHtml(k)}">Editar</button>
+        <button class="del-btn" data-op="borrarCanal" data-k="${escHtml(k)}">×</button>
+      </td></tr>`;
+  }).join('') + '</tbody></table></div>';
+}
+
+// ─── CUENTAS DE X ─────────────────────────────────────────────────────────
+// Comparte rama con el bot de contenido (_contenido/cuentas). Se escribe
+// campo a campo con .child() en vez de reemplazar el objeto entero, para no
+// pisar lo que el bot haya cambiado entretanto.
+function opGuardarCuentaX() {
+  const handle = (document.getElementById('cx-nombre').value || '').trim().replace(/^@/, '');
+  if (!handle) { toast('toast-cx', 'Ponle nombre a la cuenta'); return; }
+  const prev = cuentasXData[handle] || {};
+  const reg = {
+    seguidores: +document.getElementById('cx-seguidores').value || prev.seguidores || 0,
+    funcion: document.getElementById('cx-funcion').value,
+    categoria: (document.getElementById('cx-categoria').value || '').trim(),
+    producto: (document.getElementById('cx-producto').value || '').trim(),
+    vertical: (document.getElementById('cx-vertical').value || '').trim(),
+    programado_hasta: document.getElementById('cx-hasta').value || '',
+    aviso_dias: +document.getElementById('cx-aviso').value || 7,
+    hub: prev.hub !== undefined ? prev.hub : true,
+    objetivo: prev.objetivo || false,
+  };
+  if (prev.archivo) reg.archivo = true;
+  if (!db) { toast('toast-cx', 'Sin conexión'); return; }
+  db.ref('_contenido/cuentas/' + handle).update(reg)
+    .then(() => { toast('toast-cx', 'Cuenta guardada'); opCerrarForm('cx'); })
+    .catch(e => toast('toast-cx', 'No se pudo guardar: ' + (e && e.code ? e.code : 'error')));
+}
+
+function opEditarCuentaX(handle) {
+  const c = cuentasXData[handle]; if (!c) return;
+  document.getElementById('cx-key').value = handle;
+  document.getElementById('cx-nombre').value = handle;
+  document.getElementById('cx-seguidores').value = c.seguidores || '';
+  document.getElementById('cx-funcion').value = c.funcion || 'nicho';
+  document.getElementById('cx-categoria').value = c.categoria || '';
+  document.getElementById('cx-producto').value = c.producto || '';
+  document.getElementById('cx-vertical').value = c.vertical || '';
+  document.getElementById('cx-hasta').value = c.programado_hasta || '';
+  document.getElementById('cx-aviso').value = c.aviso_dias || 7;
+  document.getElementById('cx-form-titulo').textContent = 'Editar @' + handle;
+  opAbrirForm('cx'); opPreview('cx');
+}
+
+function opBorrarCuentaX(handle) {
+  if (!confirm(`¿Quitar @${handle}?\n\nOJO: el bot de contenido también dejará de usarla.`)) return;
+  if (!db) { toast('toast-cx', 'Sin conexión'); return; }
+  db.ref('_contenido/cuentas/' + handle).remove()
+    .then(() => toast('toast-cx', 'Cuenta quitada'))
+    .catch(() => toast('toast-cx', 'No se pudo quitar'));
+}
+
+function renderCuentasX() {
+  opPintaAvisos('cx-avisos', 'cuenta');
+  const ent = Object.entries(cuentasXData || {});
+  const cards = document.getElementById('cx-cards');
+  if (cards) {
+    const suma = f => ent.filter(([, c]) => c.funcion === f).reduce((a, [, c]) => a + (+c.seguidores || 0), 0);
+    const mil = n => n >= 1000 ? (n % 1000 === 0 ? (n / 1000) + 'k' : (n / 1000).toFixed(1) + 'k') : String(n);
+    cards.innerHTML = [
+      ['🔥 Motores', suma('motor'), 'no publican ofertas'],
+      ['🎯 Nicho', suma('nicho'), 'audiencia temática'],
+      ['📦 Producto', suma('producto'), 'aquí se cierra la venta'],
+    ].map(([t, v, s]) => `<div class="card"><div class="lbl">${t}</div><div class="val">${mil(v)}</div><div class="sub">${s}</div></div>`).join('');
+  }
+  const cont = document.getElementById('cx-lista'); if (!cont) return;
+  document.getElementById('cx-count').textContent = ent.length ? `${ent.length} cuentas` : '';
+  if (!ent.length) {
+    cont.innerHTML = `<div class="empty">No hay cuentas registradas.<br><span style="opacity:.6">Se comparten con el bot de contenido.</span></div>`;
+    return;
+  }
+  const orden = { motor: 0, nicho: 1, producto: 2 };
+  ent.sort((a, b) => (orden[a[1].funcion] ?? 9) - (orden[b[1].funcion] ?? 9) || (+b[1].seguidores || 0) - (+a[1].seguidores || 0));
+  const ico = { motor: '🔥', nicho: '🎯', producto: '📦' };
+  cont.innerHTML = `<div class="tbl-wrap"><table><thead><tr>
+      <th>Cuenta</th><th>Seguidores</th><th>Función</th><th>Vende</th><th>Contenido hasta</th><th>Quedan</th><th></th>
+    </tr></thead><tbody>` + ent.map(([h, c]) => {
+    const n = opDias(c.programado_hasta);
+    const color = n === null ? '#6b7280' : n < 0 ? '#ef4444' : n <= (+c.aviso_dias || 7) ? '#f59e0b' : '#10b981';
+    const txt = n === null ? '—' : n < 0 ? `hace ${Math.abs(n)}d` : n === 0 ? 'hoy' : `${n} día${n === 1 ? '' : 's'}`;
+    return `<tr>
+      <td><strong>@${escHtml(h)}</strong>${c.archivo ? ' 📚' : ''}${c.objetivo ? ' 🎯' : ''}<br><span style="font-size:11px;color:#6b7280">${escHtml(c.vertical || '')}</span></td>
+      <td>${(+c.seguidores || 0).toLocaleString('es-MX')}</td>
+      <td>${ico[c.funcion] || ''} ${escHtml(c.funcion || '')}</td>
+      <td style="font-size:12px">${escHtml(c.categoria || '')}${c.producto ? ` → ${escHtml(c.producto)}` : ''}</td>
+      <td>${opFechaTxt(c.programado_hasta)}</td>
+      <td><span style="color:${color};font-weight:600">${txt}</span></td>
+      <td style="text-align:right;white-space:nowrap">
+        ${c.programado_hasta ? `<a class="btn-sm" style="text-decoration:none" target="_blank" rel="noopener" href="${opGcal('Programar contenido: @' + h, c.vertical || '', c.programado_hasta)}">📅</a>` : ''}
+        <button class="btn-sm" data-op="editarCuentaX" data-k="${escHtml(h)}">Editar</button>
+        <button class="del-btn" data-op="borrarCuentaX" data-k="${escHtml(h)}">×</button>
+      </td></tr>`;
+  }).join('') + '</tbody></table></div>';
+}
+
+// ─── IDEAS ────────────────────────────────────────────────────────────────
+const OP_ESTADOS = {
+  idea:       { t: '💡 Idea suelta', c: '#6b7280' },
+  siguiente:  { t: '🎯 Siguiente',   c: '#3b82f6' },
+  haciendo:   { t: '🔨 Haciéndose',  c: '#f59e0b' },
+  hecha:      { t: '✅ Cumplida',    c: '#10b981' },
+  descartada: { t: '🗑️ Descartada',  c: '#4b5563' },
+};
+let _opFiltroIdeas = 'activas';
+
+function opGuardarIdea() {
+  const titulo = (document.getElementById('idea-titulo').value || '').trim();
+  if (!titulo) { toast('toast-idea', 'Escribe la idea'); return; }
+  const key = document.getElementById('idea-key').value || (db ? db.ref('_ideas').push().key : String(Date.now()));
+  const prev = ideasData[key] || {};
+  const estado = document.getElementById('idea-estado').value;
+  const reg = {
+    titulo,
+    detalle: (document.getElementById('idea-detalle').value || '').trim(),
+    estado,
+    prioridad: +document.getElementById('idea-prioridad').value || 2,
+    fecha: document.getElementById('idea-fecha').value || '',
+    depende: document.getElementById('idea-depende').value || '',
+    creado: prev.creado || new Date().toISOString(),
+  };
+  // Se guarda cuándo se cumplió, para poder mirar atrás y ver el ritmo real.
+  if (estado === 'hecha') reg.hechaEn = prev.hechaEn || new Date().toISOString();
+  opEscribir('_ideas/' + key, reg, 'toast-idea', 'Idea guardada')
+    .then(() => opCerrarForm('idea')).catch(() => {});
+}
+
+function opEditarIdea(key) {
+  const i = ideasData[key]; if (!i) return;
+  document.getElementById('idea-key').value = key;
+  document.getElementById('idea-titulo').value = i.titulo || '';
+  document.getElementById('idea-detalle').value = i.detalle || '';
+  document.getElementById('idea-estado').value = i.estado || 'idea';
+  document.getElementById('idea-prioridad').value = i.prioridad || 2;
+  document.getElementById('idea-fecha').value = i.fecha || '';
+  opLlenarDepende(key);
+  document.getElementById('idea-depende').value = i.depende || '';
+  document.getElementById('idea-form-titulo').textContent = 'Editar idea';
+  opAbrirForm('idea'); opPreview('idea');
+}
+
+function opCumplirIdea(key) {
+  const i = ideasData[key]; if (!i || !db) return;
+  const yaEsta = i.estado === 'hecha';
+  db.ref('_ideas/' + key).update({
+    estado: yaEsta ? 'siguiente' : 'hecha',
+    hechaEn: yaEsta ? null : new Date().toISOString(),
+  }).then(() => toast('toast-idea', yaEsta ? 'Reabierta' : '✅ Cumplida'))
+    .catch(() => toast('toast-idea', 'No se pudo actualizar'));
+}
+
+function opBorrarIdea(key) {
+  const i = ideasData[key]; if (!i) return;
+  if (!confirm(`¿Eliminar "${i.titulo}"?`)) return;
+  if (!db) return;
+  // Si otras ideas dependían de esta, se les quita la dependencia para no
+  // dejar flechas apuntando a algo que ya no existe.
+  const limpieza = {};
+  Object.entries(ideasData).forEach(([k, o]) => { if (o.depende === key) limpieza['_ideas/' + k + '/depende'] = ''; });
+  limpieza['_ideas/' + key] = null;
+  db.ref().update(limpieza)
+    .then(() => toast('toast-idea', 'Idea eliminada'))
+    .catch(() => toast('toast-idea', 'No se pudo eliminar'));
+}
+
+function opLlenarDepende(excluir) {
+  const sel = document.getElementById('idea-depende'); if (!sel) return;
+  const actual = sel.value;
+  sel.innerHTML = '<option value="">— nada —</option>' + Object.entries(ideasData)
+    .filter(([k, i]) => k !== excluir && i.estado !== 'descartada')
+    .map(([k, i]) => `<option value="${k}">${escHtml(i.titulo)}</option>`).join('');
+  sel.value = actual;
+}
+
+function opFiltrarIdeas(f) { _opFiltroIdeas = f; renderIdeas(); }
+
+function renderIdeas() {
+  const ent = Object.entries(ideasData || {});
+  const cards = document.getElementById('idea-cards');
+  if (cards) {
+    const n = e => ent.filter(([, i]) => i.estado === e).length;
+    cards.innerHTML = [
+      ['Ideas sueltas', n('idea'), 'sin fecha ni compromiso'],
+      ['En marcha', n('siguiente') + n('haciendo'), 'siguientes y haciéndose'],
+      ['Cumplidas', n('hecha'), 'ya están'],
+    ].map(([t, v, s]) => `<div class="card"><div class="lbl">${t}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
+  }
+
+  const fil = document.getElementById('idea-filtros');
+  if (fil) {
+    fil.innerHTML = [['activas', 'Activas'], ['todas', 'Todas'], ['hecha', 'Cumplidas'], ['descartada', 'Descartadas']]
+      .map(([k, t]) => `<button class="filter-btn${_opFiltroIdeas === k ? ' active' : ''}" onclick="opFiltrarIdeas('${k}')">${t}</button>`).join('');
+  }
+
+  const cont = document.getElementById('idea-lista'); if (!cont) return;
+  let lista = ent;
+  if (_opFiltroIdeas === 'activas') lista = ent.filter(([, i]) => i.estado !== 'hecha' && i.estado !== 'descartada');
+  else if (_opFiltroIdeas !== 'todas') lista = ent.filter(([, i]) => i.estado === _opFiltroIdeas);
+
+  if (!lista.length) {
+    cont.innerHTML = `<div class="empty">Nada por aquí.<br><span style="opacity:.6">Usa “+ Nueva idea” para empezar.</span></div>`;
+    return;
+  }
+
+  // Orden del roadmap: primero lo que tiene fecha y está cerca, luego por
+  // importancia. Lo cumplido siempre al final.
+  const ordEstado = { haciendo: 0, siguiente: 1, idea: 2, hecha: 8, descartada: 9 };
+  lista.sort((a, b) => {
+    const ea = ordEstado[a[1].estado] ?? 5, eb = ordEstado[b[1].estado] ?? 5;
+    if (ea !== eb) return ea - eb;
+    const fa = opDias(a[1].fecha), fb2 = opDias(b[1].fecha);
+    if (fa !== null && fb2 !== null && fa !== fb2) return fa - fb2;
+    if (fa !== null && fb2 === null) return -1;
+    if (fa === null && fb2 !== null) return 1;
+    return (b[1].prioridad || 2) - (a[1].prioridad || 2);
+  });
+
+  cont.innerHTML = lista.map(([k, i]) => {
+    const est = OP_ESTADOS[i.estado] || OP_ESTADOS.idea;
+    const n = opDias(i.fecha);
+    const atrasada = n !== null && n < 0 && i.estado !== 'hecha';
+    const pri = { 3: '🔴', 2: '🟡', 1: '⚪' }[i.prioridad || 2];
+    const dep = i.depende && ideasData[i.depende];
+    const hecha = i.estado === 'hecha';
+    return `<div class="panel" style="margin-bottom:10px;padding:14px;border-left:3px solid ${est.c};${hecha ? 'opacity:.55' : ''}">
+      <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:220px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span>${pri}</span>
+            <strong style="${hecha ? 'text-decoration:line-through' : ''}">${escHtml(i.titulo)}</strong>
+            <span class="pill" style="background:${est.c}22;color:${est.c};border-color:${est.c}44">${est.t}</span>
+            ${atrasada ? `<span class="pill" style="background:rgba(239,68,68,.15);color:#ef4444;border-color:rgba(239,68,68,.35)">atrasada ${Math.abs(n)}d</span>` : ''}
+          </div>
+          ${i.detalle ? `<div style="font-size:12px;color:#9ca3af;margin-top:5px">${escHtml(i.detalle)}</div>` : ''}
+          <div style="font-size:11px;color:#6b7280;margin-top:6px;display:flex;gap:12px;flex-wrap:wrap">
+            ${i.fecha ? `<span>📅 ${opFechaTxt(i.fecha)}${n !== null && !hecha ? ` · ${n < 0 ? 'venció' : n === 0 ? 'hoy' : 'en ' + n + 'd'}` : ''}</span>` : ''}
+            ${dep ? `<span>⛓️ después de: ${escHtml(dep.titulo)}</span>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${i.fecha && !hecha ? `<a class="btn-sm" style="text-decoration:none" target="_blank" rel="noopener" href="${opGcal(i.titulo, i.detalle || '', i.fecha)}">📅</a>` : ''}
+          <button class="btn-sm" data-op="cumplirIdea" data-k="${escHtml(k)}">${hecha ? '↩ Reabrir' : '✓ Cumplida'}</button>
+          <button class="btn-sm" data-op="editarIdea" data-k="${escHtml(k)}">Editar</button>
+          <button class="del-btn" data-op="borrarIdea" data-k="${escHtml(k)}">×</button>
+        </div>
+      </div></div>`;
+  }).join('');
+}
+
+// ─── DESPACHADOR DE BOTONES ───────────────────────────────────────────────
+// Los botones de las filas no llevan onclick con la clave incrustada. Motivo:
+// escHtml() convierte la comilla en &#39;, pero el parser HTML DECODIFICA las
+// entidades del atributo ANTES de que el motor JS lo lea — así que un nombre
+// de cuenta como  x');alert(1);//  se escapaba del string y se ejecutaba.
+// Y esos nombres los escribe el usuario desde el bot de contenido.
+// Con data-* la clave nunca entra en contexto ejecutable: es solo texto.
+document.addEventListener('click', function (ev) {
+  const b = ev.target.closest('[data-op]');
+  if (!b) return;
+  const k = b.dataset.k;
+  ({
+    editarCanal: opEditarCanal, borrarCanal: opBorrarCanal,
+    editarCuentaX: opEditarCuentaX, borrarCuentaX: opBorrarCuentaX,
+    cumplirIdea: opCumplirIdea, editarIdea: opEditarIdea, borrarIdea: opBorrarIdea,
+  }[b.dataset.op] || function () {})(k);
+});
+
+// ─── BADGE EN LA BARRA LATERAL ────────────────────────────────────────────
+function opActualizarBadges() {
+  const av = opAvisos();
+  const b = document.getElementById('sb-op-badge');
+  if (b) {
+    b.textContent = av.length ? String(av.length) : '—';
+    b.style.background = av.length ? 'rgba(245,158,11,.18)' : '';
+    b.style.color = av.length ? '#f59e0b' : '';
+  }
+}
+
 </script>
 </div><!-- /app-main -->
 </div><!-- /app-layout -->
