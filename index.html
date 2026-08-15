@@ -198,6 +198,21 @@ main{max-width:1100px;margin:0 auto;padding:30px 28px}
 .card.teal{border-left:3px solid #14b8a6;border-top:none;box-shadow:0 0 20px rgba(20,184,166,0.06)}
 .card.teal .val{color:#5eead4}
 
+/* ── Graficas de la red de X ── */
+.gx{margin-top:20px}
+.gx h4{margin:0 0 3px;font-size:12px;color:var(--text-1);font-weight:600;letter-spacing:.2px}
+.gx-nota{font-size:10px;color:var(--text-3);margin-bottom:13px;line-height:1.55}
+.gx-fila{display:grid;grid-template-columns:120px 1fr 78px;align-items:center;gap:10px;margin-bottom:7px}
+.gx-et{font-size:11px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gx-pista{background:var(--surface2);border-radius:5px;height:16px;overflow:hidden;border:1px solid var(--border)}
+.gx-barra{height:100%;border-radius:4px;min-width:3px}
+.gx-val{font-size:11px;color:var(--text-1);text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.gx-apilada{display:flex;height:28px;border-radius:7px;overflow:hidden;border:1px solid var(--border);margin-bottom:11px}
+.gx-seg{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;min-width:2px;overflow:hidden}
+.gx-leyenda{display:flex;flex-wrap:wrap;gap:13px;font-size:11px;color:var(--text-2)}
+.gx-leyenda i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+@media(max-width:640px){.gx-fila{grid-template-columns:88px 1fr 62px;gap:7px}}
+
 /* ── Grid ── */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 @media(max-width:640px){.grid2{grid-template-columns:1fr}.card .val{font-size:24px}}
@@ -1892,6 +1907,15 @@ td.muted,.muted{color:var(--text-2)}
       <button class="btn-primary" onclick="opGuardarCuentaX()">Guardar cuenta</button>
       <button class="btn-sm" onclick="opCerrarForm('cx')">Cancelar</button>
     </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h3 style="margin:0">Métricas de la red</h3>
+      <span style="font-size:12px;color:#aaa" id="cx-met-sub"></span>
+    </div>
+    <div class="cards" id="cx-met-cards" style="margin:15px 0 0"></div>
+    <div id="cx-graficas"></div>
   </div>
 
   <div class="panel" style="margin-top:16px">
@@ -4137,6 +4161,7 @@ function opBorrarCuentaX(handle) {
 
 function renderCuentasX() {
   opPintaAvisos('cx-avisos', 'cuenta');
+  renderMetricasX();
   const ent = Object.entries(cuentasXData || {});
   const cards = document.getElementById('cx-cards');
   if (cards) {
@@ -4176,6 +4201,120 @@ function renderCuentasX() {
         <button class="del-btn" data-op="borrarCuentaX" data-k="${escHtml(h)}">×</button>
       </td></tr>`;
   }).join('') + '</tbody></table></div>';
+}
+
+// ─── MÉTRICAS Y GRÁFICAS DE LA RED DE X ──────────────────────────────────
+// Barras en CSS, no en canvas: se pintan solas al cambiar Firebase, heredan
+// el tema y no dependen de ningún CDN.
+const CX_COLOR_FUNCION = { motor: '#f59e0b', nicho: '#8b5cf6', producto: '#10b981' };
+const CX_PALETA = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#14b8a6', '#8b5cf6', '#3b82f6'];
+
+function cxMil(n) {
+  if (n >= 1000) return (n % 1000 === 0 ? (n / 1000) : (n / 1000).toFixed(1)) + 'k';
+  return String(n);
+}
+
+function cxBarras(filas, maxVal) {
+  // maxVal se pasa aparte: con una sola cuenta enorme el resto sale invisible,
+  // pero el número siempre va escrito al lado para que el dato no se pierda.
+  if (!maxVal) return '';
+  return filas.map(f => `<div class="gx-fila">
+      <div class="gx-et" title="${escHtml(f.et)}">${escHtml(f.et)}</div>
+      <div class="gx-pista"><div class="gx-barra" style="width:${Math.max(0, f.v / maxVal * 100).toFixed(1)}%;background:${f.color}"></div></div>
+      <div class="gx-val" style="${f.colorVal ? 'color:' + f.colorVal : ''}">${escHtml(f.txt)}</div>
+    </div>`).join('');
+}
+
+function renderMetricasX() {
+  const cards = document.getElementById('cx-met-cards');
+  const cont = document.getElementById('cx-graficas');
+  if (!cards || !cont) return;
+
+  const ent = Object.entries(cuentasXData || {}).filter(([, c]) => c && typeof c === 'object');
+  const sub = document.getElementById('cx-met-sub');
+  if (!ent.length) {
+    cards.innerHTML = '';
+    cont.innerHTML = `<div class="empty">Sin cuentas todavía.</div>`;
+    if (sub) sub.textContent = '';
+    return;
+  }
+
+  const totalSeg = ent.reduce((a, [, c]) => a + (+c.seguidores || 0), 0);
+  const conFecha = ent.map(([h, c]) => ({ h, c, d: opDias(c.programado_hasta) })).filter(x => x.d !== null);
+  const sinFecha = ent.length - conFecha.length;
+  const prom = conFecha.length ? Math.round(conFecha.reduce((a, x) => a + x.d, 0) / conFecha.length) : null;
+  const riesgo = conFecha.filter(x => x.d <= (+x.c.aviso_dias || 7)).length;
+
+  if (sub) sub.textContent = sinFecha ? `${sinFecha} sin fecha de contenido` : 'todas con fecha';
+
+  cards.innerHTML = [
+    ['Alcance total', cxMil(totalSeg), 'seguidores sumados', ''],
+    ['Cuentas', String(ent.length), sinFecha ? `${ent.length - sinFecha} con calendario` : 'todas con calendario', 'blue'],
+    ['Contenido medio', prom === null ? '—' : prom + 'd', 'días que aguanta la red', prom !== null && prom <= 7 ? 'yellow' : 'teal'],
+    ['Por agotarse', String(riesgo), riesgo === 1 ? 'cuenta dentro de su aviso' : 'cuentas dentro de su aviso', riesgo ? 'red' : 'green'],
+  ].map(([t, v, sb, cls]) => `<div class="card ${cls}"><div class="lbl">${t}</div><div class="val">${escHtml(v)}</div><div class="sub">${escHtml(sb)}</div></div>`).join('');
+
+  // ── 1. seguidores por cuenta ──
+  const porSeg = ent.slice().sort((a, b) => (+b[1].seguidores || 0) - (+a[1].seguidores || 0));
+  const maxSeg = +porSeg[0][1].seguidores || 0;
+  const g1 = cxBarras(porSeg.map(([h, c]) => ({
+    et: '@' + h,
+    v: +c.seguidores || 0,
+    txt: (+c.seguidores || 0).toLocaleString('es-MX'),
+    color: CX_COLOR_FUNCION[c.funcion] || '#6366f1',
+  })), maxSeg);
+
+  // ── 2. dias de contenido ──
+  let g2;
+  if (!conFecha.length) {
+    g2 = `<div class="gx-nota">Ninguna cuenta tiene fecha de contenido cargada todavía.</div>`;
+  } else {
+    const orden = conFecha.slice().sort((a, b) => a.d - b.d);
+    const maxD = Math.max(1, ...orden.map(x => Math.abs(x.d)));
+    g2 = cxBarras(orden.map(x => {
+      const lim = +x.c.aviso_dias || 7;
+      const col = x.d < 0 ? '#ef4444' : x.d <= lim ? '#f59e0b' : '#10b981';
+      return {
+        et: '@' + x.h,
+        v: Math.abs(x.d),
+        txt: x.d < 0 ? `hace ${Math.abs(x.d)}d` : x.d === 0 ? 'hoy' : `${x.d}d`,
+        color: col, colorVal: col,
+      };
+    }), maxD);
+  }
+
+  // ── 3. audiencia por producto ──
+  const porProd = {};
+  ent.forEach(([, c]) => {
+    const k = (c.producto || '').trim() || 'Sin asignar';
+    porProd[k] = (porProd[k] || 0) + (+c.seguidores || 0);
+  });
+  const prods = Object.entries(porProd).sort((a, b) => b[1] - a[1]);
+  let g3 = '';
+  if (totalSeg > 0) {
+    g3 = `<div class="gx-apilada">` + prods.map(([k, v], i) => {
+      const pct = v / totalSeg * 100;
+      return `<div class="gx-seg" style="width:${pct.toFixed(2)}%;background:${CX_PALETA[i % CX_PALETA.length]}" title="${escHtml(k)}: ${v.toLocaleString('es-MX')}">${pct >= 9 ? Math.round(pct) + '%' : ''}</div>`;
+    }).join('') + `</div><div class="gx-leyenda">` + prods.map(([k, v], i) =>
+      `<span><i style="background:${CX_PALETA[i % CX_PALETA.length]}"></i>${escHtml(k)} · ${cxMil(v)}</span>`).join('') + `</div>`;
+  }
+
+  cont.innerHTML = `
+    <div class="gx">
+      <h4>Seguidores por cuenta</h4>
+      <div class="gx-nota">Color por función: <b style="color:#f59e0b">motor</b> · <b style="color:#8b5cf6">nicho</b> · <b style="color:#10b981">producto</b>. Es alcance potencial, no ventas: hoy no hay forma de saber qué cuenta trae clientes.</div>
+      ${g1}
+    </div>
+    <div class="gx">
+      <h4>Cuánto contenido queda</h4>
+      <div class="gx-nota">Ordenado por urgencia. En rojo lo ya vencido, en ámbar lo que entró en su ventana de aviso.</div>
+      ${g2}
+    </div>
+    <div class="gx">
+      <h4>A qué producto apunta la audiencia</h4>
+      <div class="gx-nota">Reparto de los ${totalSeg.toLocaleString('es-MX')} seguidores según lo que vende cada cuenta.</div>
+      ${g3}
+    </div>`;
 }
 
 // ─── IDEAS ────────────────────────────────────────────────────────────────
