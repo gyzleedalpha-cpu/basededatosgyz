@@ -2484,6 +2484,36 @@ function statusBadge(s) {
 }
 
 // ─── DATES ──────────────────────────────────────────────────────────────────
+// ── Hora de Mexico ──────────────────────────────────────────────────────────
+// No dependemos del huso del navegador ni del servidor: las fechas de venta
+// siempre se sellan en hora de Mexico. Antes, un toISOString() a partir de las
+// 18:00 mandaba la venta al dia siguiente (y el ultimo dia del mes, al mes
+// siguiente).
+const TZ_MX = 'America/Mexico_City';
+function _partesMX(d) {
+  const f = new Intl.DateTimeFormat('en-CA', { timeZone: TZ_MX,
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23' });
+  const p = {};
+  f.formatToParts(d).forEach(x => { if (x.type !== 'literal') p[x.type] = x.value; });
+  return p;
+}
+// 'YYYY-MM-DD' del dia en Mexico
+function claveDiaMX(d) {
+  const p = _partesMX(d || new Date());
+  return `${p.year}-${p.month}-${p.day}`;
+}
+// ISO con el desfase real de Mexico: 2026-08-31T22:14:53-06:00
+function fechaISO_MX(d) {
+  d = d || new Date();
+  const p = _partesMX(d);
+  const comoUTC = Date.UTC(+p.year, +p.month-1, +p.day, +p.hour, +p.minute, +p.second);
+  const offMin = Math.round((comoUTC - Math.floor(d.getTime()/1000)*1000) / 60000);
+  const sg = offMin < 0 ? '-' : '+', a = Math.abs(offMin);
+  const off = `${sg}${String(Math.floor(a/60)).padStart(2,'0')}:${String(a%60).padStart(2,'0')}`;
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}${off}`;
+}
+
 function fmtDate(d) {
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}`;
 }
@@ -2552,7 +2582,7 @@ function registrarVentaCentral(rec) {
     }
 
     db.ref('ventas').push({
-      fecha_iso: new Date().toISOString().slice(0,19) + '+00:00',
+      fecha_iso: fechaISO_MX(),
       origen: 'vip_manager',
       producto: rec.grupo + (rec.plan && rec.plan !== 'Permanente' ? ' — ' + rec.plan : rec.plan === 'Permanente' ? ' — Permanente' : ''),
       product_id: rec.grupo,
@@ -3118,7 +3148,7 @@ function renderDashboard() {
 
   // ══ HEATMAP ══
   const heatData={};
-  [...fMX,...fDH,...fGB,...fCA,...fPO].forEach(r=>{const d=parseEnt(r);if(d){const k=d.toISOString().slice(0,10);heatData[k]=(heatData[k]||0)+1;}});
+  [...fMX,...fDH,...fGB,...fCA,...fPO].forEach(r=>{const d=parseEnt(r);if(d){const k=claveDiaMX(d);heatData[k]=(heatData[k]||0)+1;}});
   fSeg.forEach(r=>{ if(r.fecha_compra_iso){ heatData[r.fecha_compra_iso]=(heatData[r.fecha_compra_iso]||0)+1; }});
   fOF.forEach(r=>{ if(r.fecha){ heatData[r.fecha]=(heatData[r.fecha]||0)+1; }});
   const heatTotal=Object.values(heatData).reduce((a,b)=>a+b,0);
@@ -3128,7 +3158,7 @@ function renderDashboard() {
   const cells=[];
   for(let i=89;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);
-    const k=d.toISOString().slice(0,10);
+    const k=claveDiaMX(d);
     const v=heatData[k]||0;
     const intensity=v/maxH;
     const color=v===0?'rgba(255,255,255,0.045)':`rgba(0,212,255,${0.22+intensity*0.72})`;
